@@ -29,15 +29,17 @@ Tüm komutlar ve Claude Desktop yapılandırması için [README-TR](https://gith
 | `Duzen-Baz_0.1.0_x64-setup.exe` | Önerilen kurulum; kullanıcı bazında kurulur, yönetici izni gerekmez |
 | `Duzen-Baz_0.1.0_x64_tr-TR.msi` | MSI paketi |
 | `Duzen-Baz_0.1.0_macos_x64.zip` | macOS uygulaması (Intel derlemesi, Apple Silicon'da Rosetta ile çalışır); zip'i açıp Uygulamalar'a sürükleyin. İmzasızdır: ilk açılışta sağ tıklayıp Aç'ı seçin |
+| `Duzen-Baz_0.1.0_amd64.deb` | Linux paketi (Debian/Ubuntu, x86_64; Xubuntu 22.04'te derlendi); `sudo apt install ./Duzen-Baz_0.1.0_amd64.deb` ile kurulur |
+| `duzenbaz-cli_0.1.0_linux_x64.tar.gz` | Linux için komut satırı aracı ve MCP sunucusu (x86_64); açıp `./duzenbaz-cli` olarak çalıştırın |
 | `duzenbaz-cli_0.1.0_macos_x64.tar.gz` | macOS için komut satırı aracı ve MCP sunucusu (Intel derlemesi); açıp `./duzenbaz-cli` olarak çalıştırın |
 | `duzenbaz-cli.exe` | Komut satırı aracı ve MCP sunucusu, kurulum gerekmez |
 | `SHA256SUMS.txt` | Yukarıdaki dosyaların sağlama toplamları |
 
-Gereksinim: Windows 10/11 (64 bit) veya zip için macOS 11 ve üstü.
+Gereksinim: Windows 10/11 (64 bit) zip için macOS 11 ve üstü veya `.deb` için 64 bit Debian/Ubuntu tabanlı Linux.
 
 ### Bilinen durumlar
 - **Dosyalar kod imzalı değildir.** Windows SmartScreen "bilinmeyen yayıncı" uyarısı gösterebilir. İndirdiğiniz dosyayı `SHA256SUMS.txt` ile doğrulayabilirsiniz.
-- Windows ve macOS paketleri hazır; Linux için kaynaktan derleyin. macOS uygulaması bir Mac'te derlendi ve noter onaylı değildir. Gece modu Linux'ta yalnızca X11 altında çalışır.
+- Windows ve macOS paketleri hazır; Linux paketleri x86_64 içindir (ARM'de denenmedi; orada kaynaktan derleyin). macOS uygulaması bir Mac'te derlendi ve noter onaylı değildir. Gece modu Linux'ta yalnızca X11 altında çalışır.
 - Bu bir ön sürümdür. Masaüstü uygulaması ve komut satırı aracı bir Windows 11 geliştirme makinesinde denendi; kurulum paketleri temiz bir makinede denenmedi. Dosyalar, tüm testler geçtikten sonra bu deponun GitHub Actions iş akışıyla temiz bir Windows makinesinde derlendi.
 - Pano verisi alan düzeyinde şifrelenir (tam dosya şifrelemesi değildir); ayrıntılar [README-TR](https://github.com/BartuAbiHD/Duzenbaz/blob/main/README-TR.md#güvenlik-ve-gizlilik) içindedir.
 - Ortak çekirdeğin ürettiği bazı mesajlar (örneğin dosya hataları) komut satırı aracında da Türkçedir.
@@ -49,4 +51,6 @@ dba70ae496a249e030a6ffb6da3da24a5086f53ac3f53d02060eb6ee800774d2  Duzen-Baz_0.1.
 eb420f1054ebe6f1791720858950b01eb84f16df9902160fa8e8ae26d24e45fb  duzenbaz-cli.exe
 efaaebff093d0549059f8786c13f2a5aae0e0ffd54d9648688b5adb37c2aa1b4  Duzen-Baz_0.1.0_macos_x64.zip
 0c9a2118ef78d19094ac3513157d3508164e265f9734122512c3134023508af5  duzenbaz-cli_0.1.0_macos_x64.tar.gz
+5abffea7ed6a8268a8e402dbf606642b7fe5700024ae1f3afe29cecdd541440c  Duzen-Baz_0.1.0_amd64.deb
+68291e00184c6bda86e8bcbdbc00b2f13e678a80d29e4fa2d8724e0ccecf94fa  duzenbaz-cli_0.1.0_linux_x64.tar.gz
 ```

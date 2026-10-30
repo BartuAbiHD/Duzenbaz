@@ -134,12 +134,14 @@ Download from the [Releases](https://github.com/BartuAbiHD/Duzenbaz/releases) pa
 - `Duzen-Baz_<version>_x64-setup.exe` — installs per user, no administrator rights needed
 - `Duzen-Baz_<version>_x64_tr-TR.msi` — MSI package
 - `Duzen-Baz_<version>_macos_x64.zip` — macOS app (Intel build; runs on Apple Silicon through Rosetta). Unzip and drag `Duzen-Baz.app` to Applications
+- `Duzen-Baz_<version>_amd64.deb` — Linux package (Debian/Ubuntu, x86_64): `sudo apt install ./Duzen-Baz_<version>_amd64.deb`
+- `duzenbaz-cli_<version>_linux_x64.tar.gz` — the command line tool and MCP server for Linux (x86_64)
 - `duzenbaz-cli_<version>_macos_x64.tar.gz` — the command line tool and MCP server for macOS (Intel build)
 - `duzenbaz-cli.exe` — the command line tool and MCP server; a single portable file, no installation needed
 
 > The packages are not code-signed yet, so Windows SmartScreen may show an "unknown publisher" warning. Check the download against `SHA256SUMS.txt`.
 
-The macOS app is not signed or notarized: on first launch right-click it and choose **Open**. There is no prebuilt Linux package yet; build it from source on the machine you want to use it on ([Development](#development)).
+The macOS app is not signed or notarized: on first launch right-click it and choose **Open**. The Linux packages are x86_64 only; on ARM (for example Raspberry Pi) build from source ([Development](#development)).
 
 ## Development
 
