@@ -121,6 +121,19 @@ jobs:
         if: runner.os == 'Linux'
         run: npm run tauri build -- --bundles deb
 
+      - name: .deb adı geçerli mi ve kurulabiliyor mu (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          DEB=$(ls src-tauri/target/release/bundle/deb/*.deb)
+          echo "dosya: $DEB"
+          NAME=$(dpkg-deb -f "$DEB" Package)
+          echo "Package: $NAME"
+          # Debian paket adları yalnızca küçük harf, rakam, + - . içerebilir
+          echo "$NAME" | grep -Eq '^[a-z0-9][a-z0-9+.-]+$'
+          case "$(basename "$DEB")" in *[!A-Za-z0-9._-]*) echo "dosya adında ASCII dışı karakter var"; exit 1;; esac
+          sudo apt-get install -y "./$DEB"
+          test -x /usr/bin/duzenbaz
+
       - name: Uygulama açılış testi (Linux, Xvfb)
         if: runner.os == 'Linux'
         env:
@@ -136,6 +149,15 @@ jobs:
       - name: Masaüstü paketi (macOS .app)
         if: runner.os == 'macOS'
         run: npm run tauri build -- --bundles app
+
+      - name: macOS paket adı ve görünen ad
+        if: runner.os == 'macOS'
+        run: |
+          APP=$(ls -d src-tauri/target/release/bundle/macos/*.app)
+          echo "paket: $APP"
+          [ "$(basename "$APP")" = "Duzen-Baz.app" ]
+          /usr/libexec/PlistBuddy -c "Print :CFBundleDisplayName" "$APP/Contents/Info.plist" | grep -qx "Düzen-Baz"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleName" "$APP/Contents/Info.plist"
 
       - name: Uygulama açılış testi (macOS)
         if: runner.os == 'macOS'
