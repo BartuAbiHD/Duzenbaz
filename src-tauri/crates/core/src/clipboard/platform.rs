@@ -234,7 +234,9 @@ mod imp {
         let window = reply.value32()?.next()?;
         let pid_atom = atom(conn, b"_NET_WM_PID")?;
         let reply = conn.get_property(false, window, pid_atom, AtomEnum::CARDINAL, 0, 1).ok()?.reply().ok()?;
-        reply.value32()?.next()
+        // Değer önce bir değişkene alınır: yineleyici `reply`'dan ödünç alır ve fonksiyon sonunda ondan önce ölmelidir.
+        let pid = reply.value32()?.next();
+        pid
     }
 
     /// Önde olan programın dosya adı (küçük harf), örn. "keepassxc". Wayland'de `None`.
