@@ -103,6 +103,20 @@ mod tests {
         assert_ne!(v.mac(b"x"), Vault::from_key([2; 32]).mac(b"x"));
     }
 
+    /// Gerçek işletim sistemi anahtar deposuyla (Windows Kimlik Bilgisi Yöneticisi, macOS Anahtar Zinciri,
+    /// Linux Secret Service) anahtarın oluşturulup aynen geri okunduğunu doğrular. Kullanıcının gerçek anahtarına
+    /// dokunmasın diye yalnızca `DUZENBAZ_KEYRING_TEST=1` ile (CI) çalışır.
+    #[test]
+    #[ignore = "gerçek bir anahtar deposu gerektirir; DUZENBAZ_KEYRING_TEST=1 ile çalıştırın"]
+    fn real_keyring_roundtrip() {
+        assert_eq!(std::env::var("DUZENBAZ_KEYRING_TEST").as_deref(), Ok("1"), "bu test gerçek anahtarı kullanır");
+        let first = Vault::load().expect("anahtar oluşturulamadı veya saklanamadı");
+        let second = Vault::load().expect("anahtar geri okunamadı");
+        assert_eq!(first.mac(b"x"), second.mac(b"x"), "ikinci yükleme aynı anahtarı vermeli");
+        let blob = first.seal(b"gizli").unwrap();
+        assert_eq!(second.open(&blob).unwrap(), b"gizli");
+    }
+
     #[test]
     fn hex_roundtrip() {
         let k = [0xabu8; 32];

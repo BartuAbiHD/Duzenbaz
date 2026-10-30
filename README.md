@@ -4,11 +4,11 @@ A lightweight desktop app that brings your files, your clipboard and your eye he
 
 **Languages:** English · [Turkish](README-TR.md)
 
-> Built and tested on **Windows** so far. Some features are not available on macOS and Linux yet (see [Platform status](#platform-status)).
+> Runs on **Windows, macOS and Linux**. Windows is the platform used day to day; macOS and Linux are built and tested automatically on every change, but have not been tried by hand yet. A few features depend on the desktop session, especially on Linux with Wayland (see [Platform status](#platform-status)).
 
 It comes as two programs that share the same core and the same local data:
 
-- **Duzen-Baz** — the desktop app (Windows installer)
+- **Duzen-Baz** — the desktop app (installers for Windows; on macOS and Linux you build it from source, see [Development](#development))
 - **`duzenbaz-cli`** — a command line tool that is also an **MCP server**, so AI assistants such as Claude can use the same features
 
 ## Modules
@@ -137,13 +137,19 @@ Download from the [Releases](https://github.com/BartuAbiHD/Duzenbaz/releases) pa
 
 > The packages are not code-signed yet, so Windows SmartScreen may show an "unknown publisher" warning. Check the download against `SHA256SUMS.txt`.
 
+There are no prebuilt packages for macOS and Linux yet; build them from source on the machine you want to use them on ([Development](#development)).
+
 ## Development
 
-Requirements:
+Requirements for every system: [Rust](https://rustup.rs) (stable) and Node.js 20+. In addition:
 
-- [Rust](https://rustup.rs) (stable, MSVC toolchain)
-- Node.js 20+
-- Visual Studio Build Tools (C++ workload) and WebView2 (included in Windows 11)
+| System | What else you need |
+|---|---|
+| **Windows** | Visual Studio Build Tools (C++ workload) with the MSVC Rust toolchain; WebView2 (included in Windows 11) |
+| **macOS** | Xcode Command Line Tools: `xcode-select --install` (macOS 11 or newer) |
+| **Linux** (Debian/Ubuntu) | `sudo apt install libwebkit2gtk-4.1-dev build-essential libssl-dev libxdo-dev libayatana-appindicator3-dev librsvg2-dev patchelf` |
+
+For other Linux distributions use the matching packages from the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/#linux) list. The Debian/Ubuntu line above is exactly what the project's CI installs.
 
 ```bash
 npm install
@@ -157,19 +163,39 @@ cd src-tauri && cargo test --workspace     # Rust unit tests (core, app, CLI/MCP
 npm run check                              # Svelte / TypeScript check
 ```
 
-Build the installers (output goes to `src-tauri/target/release/bundle`):
+Build the packages (output goes to `src-tauri/target/release/bundle`):
 
 ```bash
-npm run tauri build
+npm run tauri build                   # everything this system supports
+npm run tauri build -- --bundles deb  # or just one: deb, rpm, appimage (Linux); app, dmg (macOS); nsis, msi (Windows)
 ```
 
-Build the command line tool (output: `src-tauri/target/release/duzenbaz-cli.exe`):
+| System | Packages |
+|---|---|
+| Windows | `.exe` (NSIS) and `.msi` |
+| macOS | `.app` and `.dmg` (CI builds the `.app`) |
+| Linux | `.deb`, `.rpm` and `.AppImage` (CI builds the `.deb`) |
+
+Build the command line tool (output: `src-tauri/target/release/duzenbaz-cli`, with `.exe` on Windows):
 
 ```bash
 cd src-tauri && cargo build --release -p duzenbaz-cli
 ```
 
-On the first installer build the bundler downloads the NSIS and WiX tools (internet is only needed at build time).
+On the first Windows build the bundler downloads the NSIS and WiX tools, and on Linux the AppImage tools (internet is only needed at build time).
+
+#### Notes for macOS
+
+- The app is not signed or notarized, so Gatekeeper blocks it on first launch. Right-click the app and choose **Open**, or run `xattr -dr com.apple.quarantine /path/to/Duzen-Baz.app` once.
+- **Auto-paste** from the clipboard popup sends Cmd+V to the app in front, which macOS only allows after you grant the app **Accessibility** access (System Settings > Privacy & Security). Without it the item is still copied, you just paste it yourself.
+- The Tauri bundler prints a warning that the identifier `com.duzenbaz.app` ends in `.app`. It is harmless; the identifier is kept so data folders stay the same on every system.
+
+#### Notes for Linux
+
+- Clipboard history needs a **Secret Service** provider (GNOME Keyring or KWallet) to keep its encryption key. Without one the clipboard history stays off instead of storing data it could not decrypt later.
+- The system tray icon needs AppIndicator support. KDE and most desktops have it; GNOME needs the "AppIndicator and KStatusNotifierItem Support" extension.
+- The default popup shortcut is **Ctrl+Alt+V** here (Ctrl+Shift+V is "paste" in terminals). You can change it in the Clipboard page.
+- Night mode, idle detection, program detection and auto-paste use X11. They are not available in Wayland sessions, which do not let applications do these things (see the table below).
 
 Browser shortcuts (F12, Ctrl+Shift+I, the context menu) are switched off on purpose. To debug, start the app with the `DUZENBAZ_DEVTOOLS=1` environment variable, which skips the Windows-side lock.
 
@@ -196,7 +222,7 @@ To add a language, add a JSON file under `src/lib/i18n/` and register it in `ind
 ## Security and privacy
 
 - The desktop app never connects to the internet; its content security policy keeps network access closed. There is no telemetry. The command line tool does not use the network either.
-- **Clipboard data:** content and tags are encrypted with ChaCha20-Poly1305 before they are written to SQLite. The key is kept in the operating system's secure store (Windows Credential Manager), not in the database file. Metadata such as item type, size and time is not encrypted.
+- **Clipboard data:** content and tags are encrypted with ChaCha20-Poly1305 before they are written to SQLite. The key is kept in the operating system's secure store (Windows Credential Manager, macOS Keychain, Linux Secret Service), not in the database file. Metadata such as item type, size and time is not encrypted.
 - This is **not full-file encryption (SQLCipher)**. Field-level encryption was chosen because SQLCipher needs an OpenSSL build on Windows.
 - Destination paths for file operations are recomputed in Rust rather than taken from the interface, and deletions only ever go to the Recycle Bin.
 - If the app crashes, night mode can leave the screen tinted; just start the app again and turn night mode off.
@@ -204,13 +230,19 @@ To add a language, add a JSON file under `src/lib/i18n/` and register it in `ind
 
 ## Platform status
 
-| Feature | Windows | macOS / Linux |
-|---|---|---|
-| File Organizer, Batch Renamer | yes | should compile, not tested |
-| Clipboard history | yes | listening should work; no password-manager flag, no auto-paste |
-| Break reminder | yes | no idle detection (always counts as active) |
-| Night mode | yes | not yet |
-| Command line tool and MCP server | yes | should compile, not tested |
+| Feature | Windows | macOS | Linux (X11) | Linux (Wayland) |
+|---|---|---|---|---|
+| File Organizer, Batch Renamer | yes | yes | yes | yes |
+| Clipboard history (record, search, pin, tags) | yes | yes | yes | yes, if the compositor offers the data-control protocol |
+| Ignore copies from chosen programs | yes | yes | yes | no |
+| Skip password-manager copies automatically | yes | yes | no, use the ignore list | no |
+| Auto-paste from the popup | yes | yes, needs Accessibility access | yes | no |
+| Global popup shortcut | yes | yes | yes | mostly no (compositors block it) |
+| Break reminder | yes | yes | yes | yes, but always counts as active (no idle detection) |
+| Night mode | yes | yes | yes | no |
+| Command line tool and MCP server | yes | yes | yes | yes |
+
+How this was checked: on every change a GitHub Actions workflow builds the app, runs all tests, builds the command line tool and exercises it (including an MCP handshake), and packages the app on Linux (`.deb`) and macOS (`.app`), next to Windows. Features that need a real desktop (the popup, night mode, auto-paste, idle detection, clipboard flags) were written against each system's API but have only been tried by hand on Windows. Please report anything that behaves differently on your system.
 
 Some messages produced by the shared core (for example file errors) are still in Turkish, also in the command line tool.
 

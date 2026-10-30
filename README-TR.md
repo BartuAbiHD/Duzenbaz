@@ -4,11 +4,11 @@ Dosyalarınızı, panonuzu ve göz sağlığınızı tek bir çatı altında top
 
 **Diller:** [English](README.md) · Türkçe
 
-> Şu an **Windows** için geliştirilmiş ve denenmiştir. macOS ve Linux için bazı özellikler henüz yoktur ([Platform durumu](#platform-durumu)).
+> **Windows, macOS ve Linux** üzerinde çalışır. Günlük kullanılan platform Windows'tur; macOS ve Linux her değişiklikte otomatik olarak derlenip test edilir, ama elle denenmemiştir. Bazı özellikler masaüstü oturumuna bağlıdır, özellikle Wayland'li Linux'ta ([Platform durumu](#platform-durumu)).
 
 Aynı çekirdeği ve aynı yerel veriyi paylaşan iki programdan oluşur:
 
-- **Düzen-Baz** — masaüstü uygulaması (Windows kurulum paketi)
+- **Düzen-Baz** — masaüstü uygulaması (Windows için kurulum paketleri; macOS ve Linux'ta kaynaktan derlersiniz, bkz. [Geliştirme](#geliştirme))
 - **`duzenbaz-cli`** — komut satırı aracı; aynı zamanda bir **MCP sunucusu** olduğundan Claude gibi yapay zekâ asistanları da aynı özellikleri kullanabilir
 
 ## Modüller
@@ -137,13 +137,19 @@ Kullanılan başlıca Rust paketleri: `walkdir`, `blake3`, `trash`, `kamadak-exi
 
 > Paketler henüz kod imzalı değildir; Windows SmartScreen "bilinmeyen yayıncı" uyarısı gösterebilir. İndirdiğiniz dosyayı `SHA256SUMS.txt` ile doğrulayabilirsiniz.
 
+macOS ve Linux için henüz hazır paket yoktur; kullanacağınız makinede kaynaktan derleyin ([Geliştirme](#geliştirme)).
+
 ## Geliştirme
 
-Gereksinimler:
+Her sistem için: [Rust](https://rustup.rs) (stable) ve Node.js 20+. Ayrıca:
 
-- [Rust](https://rustup.rs) (stable, MSVC araç zinciri)
-- Node.js 20+
-- Visual Studio Build Tools (C++ iş yükü) ve WebView2 (Windows 11'de hazır gelir)
+| Sistem | Başka ne gerekir |
+|---|---|
+| **Windows** | Visual Studio Build Tools (C++ iş yükü) ve MSVC Rust araç zinciri; WebView2 (Windows 11'de hazır gelir) |
+| **macOS** | Xcode Komut Satırı Araçları: `xcode-select --install` (macOS 11 veya daha yeni) |
+| **Linux** (Debian/Ubuntu) | `sudo apt install libwebkit2gtk-4.1-dev build-essential libssl-dev libxdo-dev libayatana-appindicator3-dev librsvg2-dev patchelf` |
+
+Diğer Linux dağıtımları için [Tauri önkoşulları](https://v2.tauri.app/start/prerequisites/#linux) listesindeki karşılık gelen paketleri kullanın. Yukarıdaki Debian/Ubuntu satırı, projenin CI'ının kurduğu paketlerin aynısıdır.
 
 ```bash
 npm install
@@ -157,19 +163,39 @@ cd src-tauri && cargo test --workspace     # Rust birim testleri (çekirdek, uyg
 npm run check                              # Svelte / TypeScript denetimi
 ```
 
-Kurulum paketlerini üretmek için (çıktı `src-tauri/target/release/bundle` klasörüne yazılır):
+Paketleri üretmek için (çıktı `src-tauri/target/release/bundle` klasörüne yazılır):
 
 ```bash
-npm run tauri build
+npm run tauri build                   # bu sistemin desteklediği her şey
+npm run tauri build -- --bundles deb  # veya yalnızca biri: deb, rpm, appimage (Linux); app, dmg (macOS); nsis, msi (Windows)
 ```
 
-Komut satırı aracını derlemek için (çıktı: `src-tauri/target/release/duzenbaz-cli.exe`):
+| Sistem | Paketler |
+|---|---|
+| Windows | `.exe` (NSIS) ve `.msi` |
+| macOS | `.app` ve `.dmg` (CI `.app`'i derler) |
+| Linux | `.deb`, `.rpm` ve `.AppImage` (CI `.deb`'i derler) |
+
+Komut satırı aracını derlemek için (çıktı: `src-tauri/target/release/duzenbaz-cli`, Windows'ta `.exe` uzantılı):
 
 ```bash
 cd src-tauri && cargo build --release -p duzenbaz-cli
 ```
 
-İlk paket derlemesinde paketleyici NSIS ve WiX araçlarını indirir (yalnızca derleme zamanında internet gerekir).
+İlk Windows derlemesinde paketleyici NSIS ve WiX araçlarını, Linux'ta AppImage araçlarını indirir (yalnızca derleme zamanında internet gerekir).
+
+#### macOS için notlar
+
+- Uygulama imzalı veya noter onaylı (notarized) değildir; bu yüzden Gatekeeper ilk açılışta engeller. Uygulamaya sağ tıklayıp **Aç**'ı seçin veya bir kez `xattr -dr com.apple.quarantine /yol/Duzen-Baz.app` çalıştırın.
+- Pano penceresinden **otomatik yapıştırma**, öndeki uygulamaya Cmd+V gönderir; macOS buna yalnızca uygulamaya **Erişilebilirlik** izni verdikten sonra (Sistem Ayarları > Gizlilik ve Güvenlik) izin verir. İzin yoksa öğe yine panoya kopyalanır, yapıştırmayı siz yaparsınız.
+- Tauri paketleyicisi, `com.duzenbaz.app` kimliğinin `.app` ile bittiği için bir uyarı yazdırır. Zararsızdır; veri klasörleri her sistemde aynı kalsın diye kimlik korunmuştur.
+
+#### Linux için notlar
+
+- Pano geçmişi, şifreleme anahtarını saklamak için bir **Secret Service** sağlayıcısına (GNOME Keyring veya KWallet) ihtiyaç duyar. Yoksa, sonradan çözemeyeceği veriyi saklamak yerine pano geçmişi kapalı kalır.
+- Sistem tepsisi simgesi AppIndicator desteği ister. KDE ve çoğu masaüstünde vardır; GNOME'da "AppIndicator and KStatusNotifierItem Support" eklentisi gerekir.
+- Burada varsayılan pano penceresi kısayolu **Ctrl+Alt+V**'dir (Ctrl+Shift+V terminallerde "yapıştır"dır). Pano sayfasından değiştirebilirsiniz.
+- Gece modu, boşta kalma algısı, program algılama ve otomatik yapıştırma X11 kullanır. Uygulamaların bunları yapmasına izin vermeyen Wayland oturumlarında bulunmazlar (aşağıdaki tabloya bakın).
 
 Tarayıcı kısayolları (F12, Ctrl+Shift+I, sağ tık menüsü) bilerek kapalıdır. Hata ayıklamak için uygulamayı `DUZENBAZ_DEVTOOLS=1` ortam değişkeniyle başlatın; bu, Windows tarafındaki kilidi atlar.
 
@@ -196,7 +222,7 @@ Yeni bir dil eklemek için `src/lib/i18n/` altına bir JSON dosyası ekleyip `in
 ## Güvenlik ve gizlilik
 
 - Masaüstü uygulaması internete bağlanmaz; içerik güvenlik politikası (CSP) ağ erişimini kapalı tutar. Telemetri yoktur. Komut satırı aracı da ağı kullanmaz.
-- **Pano verisi:** içerik ve etiketler SQLite'a yazılmadan önce ChaCha20-Poly1305 ile şifrelenir. Şifreleme anahtarı veritabanı dosyasında değil, işletim sisteminin güvenli deposunda (Windows Kimlik Bilgisi Yöneticisi) saklanır. Öğe türü, boyut ve zaman gibi üst veriler şifrelenmez.
+- **Pano verisi:** içerik ve etiketler SQLite'a yazılmadan önce ChaCha20-Poly1305 ile şifrelenir. Şifreleme anahtarı veritabanı dosyasında değil, işletim sisteminin güvenli deposunda (Windows Kimlik Bilgisi Yöneticisi, macOS Anahtar Zinciri, Linux Secret Service) saklanır. Öğe türü, boyut ve zaman gibi üst veriler şifrelenmez.
 - Bu, **tam dosya şifrelemesi (SQLCipher) değildir.** SQLCipher'ın Windows'ta OpenSSL derlemesi gerektirmesi nedeniyle alan düzeyinde şifreleme tercih edilmiştir.
 - Dosya işlemlerinde hedef yollar arayüzden değil Rust tarafında yeniden hesaplanır; silme işlemleri yalnızca Geri Dönüşüm Kutusu'na yapılır.
 - Uygulama beklenmedik şekilde çökerse gece modu ekran rengini sıcak tonda bırakabilir; uygulamayı yeniden açıp gece modunu kapatmanız yeterlidir.
@@ -204,13 +230,19 @@ Yeni bir dil eklemek için `src/lib/i18n/` altına bir JSON dosyası ekleyip `in
 
 ## Platform durumu
 
-| Özellik | Windows | macOS / Linux |
-|---|---|---|
-| Dosya Düzenleyici, Toplu Adlandırıcı | evet | derlenmesi beklenir, denenmedi |
-| Pano geçmişi | evet | dinleme beklenir; parola yöneticisi işareti ve otomatik yapıştırma yok |
-| Mola hatırlatıcı | evet | boşta kalma algısı yok (hep aktif sayılır) |
-| Gece modu | evet | henüz yok |
-| Komut satırı aracı ve MCP sunucusu | evet | derlenmesi beklenir, denenmedi |
+| Özellik | Windows | macOS | Linux (X11) | Linux (Wayland) |
+|---|---|---|---|---|
+| Dosya Düzenleyici, Toplu Adlandırıcı | evet | evet | evet | evet |
+| Pano geçmişi (kaydetme, arama, sabitleme, etiket) | evet | evet | evet | evet, kompozitör data-control protokolünü sunuyorsa |
+| Seçili programlardan kopyalananları yoksay | evet | evet | evet | hayır |
+| Parola yöneticisi kopyalarını otomatik atla | evet | evet | hayır, yoksayma listesini kullanın | hayır |
+| Açılır pencereden otomatik yapıştırma | evet | evet, Erişilebilirlik izni gerekir | evet | hayır |
+| Genel açılır pencere kısayolu | evet | evet | evet | çoğunlukla hayır (kompozitörler engeller) |
+| Mola hatırlatıcı | evet | evet | evet | evet, ama hep aktif sayılır (boşta kalma algısı yok) |
+| Gece modu | evet | evet | evet | hayır |
+| Komut satırı aracı ve MCP sunucusu | evet | evet | evet | evet |
+
+Bunun nasıl denetlendiği: her değişiklikte bir GitHub Actions iş akışı uygulamayı derler, tüm testleri çalıştırır, komut satırı aracını derleyip dener (MCP el sıkışması dahil) ve Windows'un yanında Linux'ta (`.deb`) ve macOS'ta (`.app`) uygulamayı paketler. Gerçek bir masaüstü gerektiren özellikler (açılır pencere, gece modu, otomatik yapıştırma, boşta kalma algısı, pano işaretleri) her sistemin kendi API'sine göre yazıldı, ama elle yalnızca Windows'ta denendi. Sisteminizde farklı davranan bir şey görürseniz lütfen bildirin.
 
 Ortak çekirdeğin ürettiği bazı mesajlar (örneğin dosya hataları) komut satırı aracında da Türkçedir.
 

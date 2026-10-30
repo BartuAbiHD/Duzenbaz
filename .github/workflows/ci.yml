@@ -35,6 +35,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libssl-dev libxdo-dev \
             libayatana-appindicator3-dev librsvg2-dev patchelf
+          # Yalnızca testler için: sanal X sunucusu ve gerçek bir Secret Service (anahtar deposu)
+          sudo apt-get install -y xvfb gnome-keyring dbus-x11
 
       - uses: actions/setup-node@v4
         with:
@@ -92,10 +94,60 @@ jobs:
           test "$(wc -l < "$RUNNER_TEMP/mcp.out" | tr -d ' ')" = "2"
           grep -q '"name":"organize_preview"' "$RUNNER_TEMP/mcp.out"
 
+      # --- Linux: gerçek X sunucusu ve anahtar deposuyla çalışma zamanı testleri ---
+      - name: X11 testi (boşta süre, gece modu, tuş gönderme) — Xvfb
+        if: runner.os == 'Linux'
+        working-directory: src-tauri
+        run: xvfb-run -a cargo test -p duzenbaz-core --test x11 -- --ignored --nocapture
+
+      - name: Anahtar deposu testi (gnome-keyring, Secret Service)
+        if: runner.os == 'Linux'
+        working-directory: src-tauri
+        env:
+          DUZENBAZ_KEYRING_TEST: "1"
+        run: |
+          dbus-run-session -- bash -c '
+            echo "ci-parolasi" | gnome-keyring-daemon --unlock --components=secrets > /dev/null
+            cargo test -p duzenbaz-core real_keyring_roundtrip -- --ignored --nocapture'
+
+      # --- macOS: Objective-C ve CoreGraphics çağrıları ---
+      - name: macOS platform testi (CoreGraphics, Objective-C)
+        if: runner.os == 'macOS'
+        working-directory: src-tauri
+        run: cargo test -p duzenbaz-core --test macos -- --ignored --nocapture
+
+      # --- Paketleme ve uygulamanın gerçekten açıldığı ---
       - name: Masaüstü paketi (Linux .deb)
         if: runner.os == 'Linux'
         run: npm run tauri build -- --bundles deb
 
+      - name: Uygulama açılış testi (Linux, Xvfb)
+        if: runner.os == 'Linux'
+        env:
+          WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
+          WEBKIT_DISABLE_COMPOSITING_MODE: "1"
+        run: |
+          set +e
+          timeout 25 xvfb-run -a --server-args="-screen 0 1280x800x24" src-tauri/target/release/duzenbaz
+          code=$?
+          echo "çıkış kodu: $code (124 = 25 saniye boyunca çalışmaya devam etti)"
+          [ "$code" = "124" ]
+
       - name: Masaüstü paketi (macOS .app)
         if: runner.os == 'macOS'
         run: npm run tauri build -- --bundles app
+
+      - name: Uygulama açılış testi (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          BIN=$(ls src-tauri/target/release/bundle/macos/*.app/Contents/MacOS/* | head -1)
+          echo "çalıştırılıyor: $BIN"
+          "$BIN" &
+          PID=$!
+          sleep 20
+          if kill -0 "$PID" 2>/dev/null; then
+            echo "uygulama 20 saniye boyunca çalışmaya devam etti"
+            kill "$PID"
+          else
+            wait "$PID"; echo "uygulama erken çıktı, kod: $?"; exit 1
+          fi

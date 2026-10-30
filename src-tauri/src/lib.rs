@@ -51,11 +51,19 @@ pub fn run() {
             breaks::create_window(app.handle())?;
             breaks::start(app.handle().clone());
 
-            tray::create(app.handle())?;
+            // Tepsi oluşturulamazsa uygulama yine açılır (bkz. tray::TrayState).
+            let tray_ok = match tray::create(app.handle()) {
+                Ok(()) => true,
+                Err(e) => {
+                    eprintln!("Sistem tepsisi oluşturulamadı: {e}");
+                    false
+                }
+            };
+            app.manage(tray::TrayState(AtomicBool::new(tray_ok)));
             lockdown::apply_all(app.handle());
 
-            // Windows ile başlarken pencere açılmadan doğrudan tepsiye gider.
-            if std::env::args().any(|a| a == "--minimized") {
+            // Oturum açılırken pencere açılmadan doğrudan tepsiye gider (tepsi yoksa pencere görünür kalır).
+            if tray_ok && std::env::args().any(|a| a == "--minimized") {
                 if let Some(w) = app.get_webview_window("main") {
                     w.hide()?;
                 }
@@ -63,10 +71,14 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|window, event| match event {
-            // Pencereyi kapatmak uygulamayı bitirmez, tepsiye indirir.
+            // Pencereyi kapatmak uygulamayı bitirmez, tepsiye indirir. Tepsi yoksa ana pencereyi kapatmak uygulamayı bitirir.
             WindowEvent::CloseRequested { api, .. } => {
-                api.prevent_close();
-                let _ = window.hide();
+                if window.label() == "main" && !tray::TrayState::available(window.app_handle()) {
+                    window.app_handle().exit(0);
+                } else {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
             }
             // Açılır pano penceresi odağı kaybedince kendiliğinden kapanır.
             WindowEvent::Focused(false) if window.label() == clipboard::popup::LABEL => {

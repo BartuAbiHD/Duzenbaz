@@ -76,6 +76,22 @@ pub struct TrashReport {
     pub skipped: usize,
 }
 
+/// macOS'ta `trash` kütüphanesinin varsayılanı Finder'a komut göndermektir; bu, kullanıcıdan "Finder'ı denetleme"
+/// (Otomasyon) izni ister ve reddedilirse silme çalışmaz. İzin istemeyen NSFileManager yöntemi kullanılır
+/// (Finder'ın "Geri Koy" seçeneği çıkmaz, ama dosyalar Çöp Sepeti'ndedir ve elle geri alınabilir).
+#[cfg(target_os = "macos")]
+fn move_to_trash(paths: &[PathBuf]) -> Result<(), trash::Error> {
+    use trash::macos::{DeleteMethod, TrashContextExtMacos};
+    let mut context = trash::TrashContext::default();
+    context.set_delete_method(DeleteMethod::NsFileManager);
+    context.delete_all(paths)
+}
+
+#[cfg(not(target_os = "macos"))]
+fn move_to_trash(paths: &[PathBuf]) -> Result<(), trash::Error> {
+    trash::delete_all(paths)
+}
+
 /// Kalıcı silme yoktur: dosyalar yalnızca Geri Dönüşüm Kutusu'na gönderilir. Her dosya,
 /// saklanan dosyayla aynı içerikte olduğu yeniden doğrulanmadan gönderilmez.
 pub fn trash_duplicates(requests: &[TrashRequest]) -> AppResult<TrashReport> {
@@ -87,7 +103,7 @@ pub fn trash_duplicates(requests: &[TrashRequest]) -> AppResult<TrashReport> {
         if verified.is_empty() {
             continue;
         }
-        trash::delete_all(&verified).map_err(|_| {
+        move_to_trash(&verified).map_err(|_| {
             AppError::msg("Dosyalar Geri Dönüşüm Kutusu'na gönderilemedi. Dosyalar başka bir programda açık olabilir.")
         })?;
         trashed += verified.len();

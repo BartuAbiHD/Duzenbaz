@@ -4,6 +4,16 @@ use tauri::{
     AppHandle, Manager,
 };
 
+/// Tepsi simgesinin gerçekten oluşturulup oluşturulamadığı. Bazı Linux masaüstlerinde (tepsi desteği olmayanlar)
+/// oluşturulamaz; o zaman ana pencereyi kapatmak uygulamayı gizlemek yerine bitirmelidir, yoksa uygulamaya bir daha erişilemez.
+pub struct TrayState(pub std::sync::atomic::AtomicBool);
+
+impl TrayState {
+    pub fn available(app: &AppHandle) -> bool {
+        app.try_state::<TrayState>().map(|s| s.0.load(std::sync::atomic::Ordering::Relaxed)).unwrap_or(true)
+    }
+}
+
 pub fn show_main(app: &AppHandle) {
     if let Some(w) = app.get_webview_window("main") {
         let _ = w.show();
