@@ -35,5 +35,12 @@
     "linux": {
       "deb": { "section": "utils" }
     }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFGMDAzMzY4QzM4MzlDNkYKUldSdm5JUERhRE1BSDVkK1lTOUlZSVR6dFpkZ2N1VG0ycFNZeldQZFhON211RTkzcWRxRHRRMnoK",
+      "endpoints": ["https://github.com/BartuAbiHD/Duzenbaz/releases/latest/download/latest.json"],
+      "windows": { "installMode": "passive" }
+    }
   }
 }

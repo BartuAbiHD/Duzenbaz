@@ -20,10 +20,23 @@ fn db_version(db: State<db::Db>) -> AppResult<i64> {
     db.version()
 }
 
+/// Uygulama kendini kurabilir mi? Windows ve macOS'ta evet; Linux'ta .deb kendini güncelleyemez, yalnızca bildirim verilir.
+#[tauri::command]
+fn app_can_self_update() -> bool {
+    cfg!(any(windows, target_os = "macos"))
+}
+
+#[tauri::command]
+fn app_restart(app: tauri::AppHandle) {
+    app.restart();
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, _shortcut, event| {
@@ -88,6 +101,8 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             db_version,
+            app_can_self_update,
+            app_restart,
             organizer::default_downloads,
             organizer::organizer_plan,
             organizer::organizer_apply,

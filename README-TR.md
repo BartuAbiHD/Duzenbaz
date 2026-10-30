@@ -1,6 +1,6 @@
 # Düzen-Baz
 
-Dosyalarınızı, panonuzu ve göz sağlığınızı tek bir çatı altında toplayan, Türkçe arayüzlü, hafif bir masaüstü uygulaması. Tüm veriler yalnızca bilgisayarınızda kalır; internet bağlantısı gerekmez ve telemetri yoktur.
+Dosyalarınızı, panonuzu ve göz sağlığınızı tek bir çatı altında toplayan, Türkçe arayüzlü, hafif bir masaüstü uygulaması. Tüm veriler yalnızca bilgisayarınızda kalır; internet bağlantısı gerekmez ve telemetri yoktur. Güncelleme kontrolü isteğe bağlıdır ve varsayılan olarak kapalıdır.
 
 **Diller:** [English](README.md) · Türkçe
 
@@ -225,7 +225,7 @@ Yeni bir dil eklemek için `src/lib/i18n/` altına bir JSON dosyası ekleyip `in
 
 ## Güvenlik ve gizlilik
 
-- Masaüstü uygulaması internete bağlanmaz; içerik güvenlik politikası (CSP) ağ erişimini kapalı tutar. Telemetri yoktur. Komut satırı aracı da ağı kullanmaz.
+- Masaüstü uygulaması, **Ayarlar → Güncellemeler**'i siz açmadıkça internete bağlanmaz; açarsanız yalnızca GitHub'dan en son sürüm numarasını sorar (veri gönderilmez) ve her güncellemeyi imzayla doğrular. Web görünümünün içerik güvenlik politikası (CSP) ağ erişimini kapalı tutar. Telemetri yoktur. Komut satırı aracı ağı kullanmaz. Ayrıntılar: [docs/GUNCELLEME.md](docs/GUNCELLEME.md).
 - **Pano verisi:** içerik ve etiketler SQLite'a yazılmadan önce ChaCha20-Poly1305 ile şifrelenir. Şifreleme anahtarı veritabanı dosyasında değil, işletim sisteminin güvenli deposunda (Windows Kimlik Bilgisi Yöneticisi, macOS Anahtar Zinciri, Linux Secret Service) saklanır. Öğe türü, boyut ve zaman gibi üst veriler şifrelenmez.
 - Bu, **tam dosya şifrelemesi (SQLCipher) değildir.** SQLCipher'ın Windows'ta OpenSSL derlemesi gerektirmesi nedeniyle alan düzeyinde şifreleme tercih edilmiştir.
 - Dosya işlemlerinde hedef yollar arayüzden değil Rust tarafında yeniden hesaplanır; silme işlemleri yalnızca Geri Dönüşüm Kutusu'na yapılır.

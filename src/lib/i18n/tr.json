@@ -1,5 +1,7 @@
 {
-  "app": { "name": "Düzen-Baz" },
+  "app": {
+    "name": "Düzen-Baz"
+  },
   "menu": {
     "organizer": "Dosya Düzenleyici",
     "renamer": "Toplu Adlandırıcı",
@@ -7,7 +9,9 @@
     "breaks": "Mola ve Göz Sağlığı",
     "settings": "Ayarlar"
   },
-  "common": { "soon": "Bu modül sonraki adımda eklenecek." },
+  "common": {
+    "soon": "Bu modül sonraki adımda eklenecek."
+  },
   "breaks": {
     "title": "Mola ve Göz Sağlığı",
     "reminder": "Mola hatırlatıcısı",
@@ -160,6 +164,21 @@
     "autostart": "Bilgisayar açılınca otomatik başlat",
     "autostartHint": "Uygulama sistem tepsisinde sessizce başlar.",
     "database": "Yerel veritabanı sürümü",
-    "privacy": "Tüm verileriniz yalnızca bu bilgisayarda tutulur. İnternet bağlantısı kullanılmaz, telemetri yoktur."
+    "privacy": "Tüm verileriniz yalnızca bu bilgisayarda tutulur. Telemetri yoktur; güncelleme kontrolünü siz açmadıkça internet bağlantısı kullanılmaz.",
+    "updates": "Güncellemeler",
+    "updatesAuto": "Açılışta güncelleme olup olmadığını kontrol et",
+    "updatesHint": "Kapalıyken uygulama internete hiç bağlanmaz. Açıkken yalnızca GitHub'dan en son sürüm numarası sorulur; hiçbir veri gönderilmez.",
+    "updatesCheck": "Şimdi kontrol et",
+    "updatesChecking": "Kontrol ediliyor…",
+    "updatesNone": "Güncelsiniz.",
+    "updatesAvailable": "Yeni sürüm var: {version}",
+    "updatesInstall": "İndir ve kur",
+    "updatesDownloading": "İndiriliyor… %{percent}",
+    "updatesReady": "Güncelleme kuruldu. Yeniden başlatın.",
+    "updatesRestart": "Yeniden başlat",
+    "updatesOpenPage": "İndirme sayfasını aç",
+    "updatesManual": "Bu sistemde uygulama kendini kuramaz; yeni paketi indirip kurun.",
+    "updatesError": "Güncelleme kontrol edilemedi.",
+    "updatesToast": "Yeni sürüm var: {version}. Ayarlar'dan kurabilirsiniz."
   }
 }

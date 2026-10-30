@@ -7,6 +7,11 @@
   import { timeFormat, type TimeFormat } from "../../lib/stores/timeFormat";
   import { LOCALES, setLocale } from "../../lib/i18n";
   import { notify } from "../../lib/stores/toast";
+  import { openUrl } from "@tauri-apps/plugin-opener";
+  import { autoCheck, updateState, checkForUpdate, installUpdate, restartApp } from "../../lib/stores/updates";
+
+  const RELEASES = "https://github.com/BartuAbiHD/Duzenbaz/releases";
+  let canSelfUpdate = $state(true);
 
   let autostart = $state(false);
   let dbVersion = $state<number | null>(null);
@@ -19,6 +24,9 @@
     }
     try {
       dbVersion = await call<number>("db_version");
+    } catch {}
+    try {
+      canSelfUpdate = await call<boolean>("app_can_self_update");
     } catch {}
   });
 
@@ -89,6 +97,50 @@
       <span class="font-semibold">{$_("settings.autostart")}</span>
     </label>
     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{$_("settings.autostartHint")}</p>
+  </section>
+
+  <section>
+    <div class="mb-2 text-sm font-semibold">{$_("settings.updates")}</div>
+    <label class="flex items-center gap-3 text-sm">
+      <input type="checkbox" bind:checked={$autoCheck} class="h-4 w-4" />
+      <span>{$_("settings.updatesAuto")}</span>
+    </label>
+    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{$_("settings.updatesHint")}</p>
+
+    <div class="mt-3 flex flex-wrap items-center gap-3 text-sm">
+      <button
+        class="rounded-lg border border-slate-300 px-4 py-2 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-700"
+        disabled={$updateState.status === "checking" || $updateState.status === "downloading"}
+        onclick={() => checkForUpdate(false)}>{$_("settings.updatesCheck")}</button
+      >
+      {#if $updateState.status === "checking"}
+        <span>{$_("settings.updatesChecking")}</span>
+      {:else if $updateState.status === "none"}
+        <span>{$_("settings.updatesNone")}</span>
+      {:else if $updateState.status === "error"}
+        <span class="text-rose-600 dark:text-rose-400">{$_("settings.updatesError")}</span>
+      {:else if $updateState.status === "downloading"}
+        <span>{$_("settings.updatesDownloading", { values: { percent: $updateState.percent ?? 0 } })}</span>
+      {:else if $updateState.status === "ready"}
+        <span>{$_("settings.updatesReady")}</span>
+        <button class="rounded-lg bg-indigo-600 px-4 py-2 text-white" onclick={restartApp}>{$_("settings.updatesRestart")}</button>
+      {/if}
+    </div>
+
+    {#if $updateState.status === "available"}
+      <div class="mt-3 rounded-lg border border-indigo-300 bg-indigo-50 p-3 text-sm dark:border-indigo-500/40 dark:bg-indigo-500/10">
+        <div class="font-semibold">{$_("settings.updatesAvailable", { values: { version: $updateState.version ?? "" } })}</div>
+        {#if $updateState.notes}
+          <p class="mt-1 whitespace-pre-line text-xs text-slate-600 dark:text-slate-300">{$updateState.notes}</p>
+        {/if}
+        {#if canSelfUpdate}
+          <button class="mt-3 rounded-lg bg-indigo-600 px-4 py-2 text-white" onclick={installUpdate}>{$_("settings.updatesInstall")}</button>
+        {:else}
+          <p class="mt-2 text-xs">{$_("settings.updatesManual")}</p>
+          <button class="mt-2 rounded-lg bg-indigo-600 px-4 py-2 text-white" onclick={() => openUrl(RELEASES)}>{$_("settings.updatesOpenPage")}</button>
+        {/if}
+      </div>
+    {/if}
   </section>
 
   <section class="text-sm">

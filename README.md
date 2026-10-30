@@ -1,6 +1,6 @@
 # Duzen-Baz
 
-A lightweight desktop app that brings your files, your clipboard and your eye health together under one roof. Everything stays on your computer: no internet connection is needed and there is no telemetry.
+A lightweight desktop app that brings your files, your clipboard and your eye health together under one roof. Everything stays on your computer: no internet connection is needed and there is no telemetry. Update checking is optional and off by default.
 
 **Languages:** English · [Turkish](README-TR.md)
 
@@ -225,7 +225,7 @@ To add a language, add a JSON file under `src/lib/i18n/` and register it in `ind
 
 ## Security and privacy
 
-- The desktop app never connects to the internet; its content security policy keeps network access closed. There is no telemetry. The command line tool does not use the network either.
+- The desktop app does not connect to the internet unless you turn on **Settings → Updates**; then it only asks GitHub for the latest version number (no data is sent) and verifies every update with a signature. The web view's content security policy keeps network access closed. There is no telemetry. The command line tool does not use the network. Details: [docs/GUNCELLEME.md](docs/GUNCELLEME.md).
 - **Clipboard data:** content and tags are encrypted with ChaCha20-Poly1305 before they are written to SQLite. The key is kept in the operating system's secure store (Windows Credential Manager, macOS Keychain, Linux Secret Service), not in the database file. Metadata such as item type, size and time is not encrypted.
 - This is **not full-file encryption (SQLCipher)**. Field-level encryption was chosen because SQLCipher needs an OpenSSL build on Windows.
 - Destination paths for file operations are recomputed in Rust rather than taken from the interface, and deletions only ever go to the Recycle Bin.

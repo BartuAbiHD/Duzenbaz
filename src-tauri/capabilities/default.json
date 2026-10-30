@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "Ana pencere ve açılır pano penceresi izinleri",
   "windows": ["main", "popup", "break"],
-  "permissions": ["core:default", "autostart:allow-enable", "autostart:allow-disable", "autostart:allow-is-enabled", "dialog:allow-open"]
+  "permissions": ["core:default", "autostart:allow-enable", "autostart:allow-disable", "autostart:allow-is-enabled", "dialog:allow-open", "updater:allow-check", "updater:allow-download-and-install", {"identifier": "opener:allow-open-url", "allow": [{"url": "https://github.com/BartuAbiHD/Duzenbaz/releases*"}]}]
 }

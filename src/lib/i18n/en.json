@@ -1,5 +1,7 @@
 {
-  "app": { "name": "Düzen-Baz" },
+  "app": {
+    "name": "Düzen-Baz"
+  },
   "menu": {
     "organizer": "File Organizer",
     "renamer": "Batch Renamer",
@@ -7,7 +9,9 @@
     "breaks": "Breaks & Eye Care",
     "settings": "Settings"
   },
-  "common": { "soon": "This module will be added in a later step." },
+  "common": {
+    "soon": "This module will be added in a later step."
+  },
   "breaks": {
     "title": "Breaks & Eye Care",
     "reminder": "Break reminder",
@@ -160,6 +164,21 @@
     "autostart": "Start automatically when the computer starts",
     "autostartHint": "The app starts quietly in the system tray.",
     "database": "Local database version",
-    "privacy": "All your data stays on this computer. No internet connection is used and there is no telemetry."
+    "privacy": "All your data stays on this computer. There is no telemetry, and no internet connection is used unless you turn on update checking.",
+    "updates": "Updates",
+    "updatesAuto": "Check for updates when the app starts",
+    "updatesHint": "While this is off the app never connects to the internet. While it is on, only the latest version number is requested from GitHub; no data is sent.",
+    "updatesCheck": "Check now",
+    "updatesChecking": "Checking…",
+    "updatesNone": "You are up to date.",
+    "updatesAvailable": "New version available: {version}",
+    "updatesInstall": "Download and install",
+    "updatesDownloading": "Downloading… {percent}%",
+    "updatesReady": "Update installed. Restart to finish.",
+    "updatesRestart": "Restart",
+    "updatesOpenPage": "Open download page",
+    "updatesManual": "On this system the app cannot install itself; download and install the new package.",
+    "updatesError": "Could not check for updates.",
+    "updatesToast": "New version available: {version}. You can install it from Settings."
   }
 }

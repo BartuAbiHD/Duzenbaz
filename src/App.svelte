@@ -6,7 +6,10 @@
   import Clipboard from "./modules/clipboard/Page.svelte";
   import Breaks from "./modules/breaks/Page.svelte";
   import Settings from "./modules/settings/Page.svelte";
+  import { onMount } from "svelte";
+  import { get } from "svelte/store";
   import "./lib/stores/theme";
+  import { autoCheck, checkForUpdate } from "./lib/stores/updates";
 
   const items = [
     { id: "organizer", icon: "folders" },
@@ -19,6 +22,13 @@
 
   let current = $state<keyof typeof pages>("organizer");
   const Page = $derived(pages[current]);
+
+  // Yalnızca kullanıcı açtıysa ve yalnızca ana pencerede: açılıştan biraz sonra sessizce sürüm sorar.
+  onMount(() => {
+    if (!get(autoCheck)) return;
+    const t = setTimeout(() => checkForUpdate(true), 8000);
+    return () => clearTimeout(t);
+  });
 </script>
 
 <div class="flex h-full">
