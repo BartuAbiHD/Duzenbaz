@@ -29,6 +29,7 @@ See the [README](https://github.com/BartuAbiHD/Duzenbaz#command-line-tool-and-mc
 | `Duzen-Baz_0.1.0_x64-setup.exe` | Recommended installer; installs per user, no administrator rights needed |
 | `Duzen-Baz_0.1.0_x64_tr-TR.msi` | MSI package |
 | `Duzen-Baz_0.1.0_macos_x64.zip` | macOS app (Intel build, runs on Apple Silicon through Rosetta); unzip and drag to Applications. Not signed: right-click and choose Open on first launch |
+| `duzenbaz-cli_0.1.0_macos_x64.tar.gz` | Command line tool and MCP server for macOS (Intel build); extract it and run `./duzenbaz-cli` |
 | `duzenbaz-cli.exe` | Command line tool and MCP server, no installation needed |
 | `SHA256SUMS.txt` | Checksums of the files above |
 
@@ -47,4 +48,5 @@ e3bad363e834b7f888a71b3486bcdde78fb205acc8c7aa45fdbda54ab0cc0f51  Duzen-Baz_0.1.
 dba70ae496a249e030a6ffb6da3da24a5086f53ac3f53d02060eb6ee800774d2  Duzen-Baz_0.1.0_x64_tr-TR.msi
 eb420f1054ebe6f1791720858950b01eb84f16df9902160fa8e8ae26d24e45fb  duzenbaz-cli.exe
 efaaebff093d0549059f8786c13f2a5aae0e0ffd54d9648688b5adb37c2aa1b4  Duzen-Baz_0.1.0_macos_x64.zip
+0c9a2118ef78d19094ac3513157d3508164e265f9734122512c3134023508af5  duzenbaz-cli_0.1.0_macos_x64.tar.gz
 ```
