@@ -36,13 +36,13 @@ Requirements: Windows 10/11 (64-bit).
 ### Known notes
 - **The files are not code-signed.** Windows SmartScreen may show an "unknown publisher" warning. Check your download against `SHA256SUMS.txt`.
 - Windows only for now. Night mode and auto-paste do not work on macOS or Linux yet.
-- This is a pre-release. The desktop app and the command line tool were tried on a Windows 11 development machine; the installers were not tried on a clean machine.
+- This is a pre-release. The desktop app and the command line tool were tried on a Windows 11 development machine; the installers were not tried on a clean machine. The files were built by this repository's GitHub Actions workflow on a clean Windows runner, after all tests passed.
 - Clipboard data is encrypted field by field (not full-file encryption); details are in the [README](https://github.com/BartuAbiHD/Duzenbaz#security-and-privacy).
 - Some messages from the shared core (for example file errors) are still in Turkish, also in the command line tool.
 
 ### Checksums (SHA-256)
 ```
-043fdc992feb99c967957ff5c90d969fa4de9443bf6268e73f0f1f7cddcaf6f7  Duzen-Baz_0.1.0_x64-setup.exe
-b75b75aed8d5d8be5d85707fb54f8fa8533b1281f5644669f74933eb6d5c8429  Duzen-Baz_0.1.0_x64_tr-TR.msi
-b3be133fe33fc96913e14f6d8f852283ceb38d8713f0c8cc9ff3197f0524bed2  duzenbaz-cli.exe
+e3bad363e834b7f888a71b3486bcdde78fb205acc8c7aa45fdbda54ab0cc0f51  Duzen-Baz_0.1.0_x64-setup.exe
+dba70ae496a249e030a6ffb6da3da24a5086f53ac3f53d02060eb6ee800774d2  Duzen-Baz_0.1.0_x64_tr-TR.msi
+eb420f1054ebe6f1791720858950b01eb84f16df9902160fa8e8ae26d24e45fb  duzenbaz-cli.exe
 ```
