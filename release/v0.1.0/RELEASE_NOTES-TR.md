@@ -40,14 +40,14 @@ Gereksinim: Windows 10/11 (64 bit) zip için macOS 11 ve üstü veya `.deb` içi
 ### Bilinen durumlar
 - **Dosyalar kod imzalı değildir.** Windows SmartScreen "bilinmeyen yayıncı" uyarısı gösterebilir. İndirdiğiniz dosyayı `SHA256SUMS.txt` ile doğrulayabilirsiniz.
 - Windows ve macOS paketleri hazır; Linux paketleri x86_64 içindir (ARM'de denenmedi; orada kaynaktan derleyin). macOS uygulaması bir Mac'te derlendi ve noter onaylı değildir. Gece modu Linux'ta yalnızca X11 altında çalışır.
-- Bu bir ön sürümdür. Masaüstü uygulaması ve komut satırı aracı bir Windows 11 geliştirme makinesinde denendi; kurulum paketleri temiz bir makinede denenmedi. Dosyalar, tüm testler geçtikten sonra bu deponun GitHub Actions iş akışıyla temiz bir Windows makinesinde derlendi.
+- Bu bir ön sürümdür. Masaüstü uygulaması ve komut satırı aracı bir Windows 11 geliştirme makinesinde denendi; kurulum paketleri temiz bir makinede denenmedi. Windows kurulum paketleri geliştirme makinesinde yerel olarak derlendi (Linux ve macOS paketleri kendi makinelerinde derlendi); hiçbir paket CI ile derlenmedi.
 - Pano verisi alan düzeyinde şifrelenir (tam dosya şifrelemesi değildir); ayrıntılar [README-TR](https://github.com/BartuAbiHD/Duzenbaz/blob/main/README-TR.md#güvenlik-ve-gizlilik) içindedir.
 - Ortak çekirdeğin ürettiği bazı mesajlar (örneğin dosya hataları) komut satırı aracında da Türkçedir.
 
 ### Sağlama toplamları (SHA-256)
 ```
-e3bad363e834b7f888a71b3486bcdde78fb205acc8c7aa45fdbda54ab0cc0f51  Duzen-Baz_0.1.0_x64-setup.exe
-dba70ae496a249e030a6ffb6da3da24a5086f53ac3f53d02060eb6ee800774d2  Duzen-Baz_0.1.0_x64_tr-TR.msi
+b4bbf315e0eb1175ff3e488286826e1b9e3b31c0b7f72ef3b8179b2afb83b67d  Duzen-Baz_0.1.0_x64-setup.exe
+d9b2bbba0ae13c55b775c5470431e4327df87c2907cda36655c50b9e1a13d267  Duzen-Baz_0.1.0_x64_tr-TR.msi
 eb420f1054ebe6f1791720858950b01eb84f16df9902160fa8e8ae26d24e45fb  duzenbaz-cli.exe
 efaaebff093d0549059f8786c13f2a5aae0e0ffd54d9648688b5adb37c2aa1b4  Duzen-Baz_0.1.0_macos_x64.zip
 0c9a2118ef78d19094ac3513157d3508164e265f9734122512c3134023508af5  duzenbaz-cli_0.1.0_macos_x64.tar.gz
