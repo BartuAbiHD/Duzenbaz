@@ -8,5 +8,8 @@
     <msi-file path="Duzen-Baz_*_x64_tr-TR.msi">
       <authenticode-sign />
     </msi-file>
+    <pe-file path="duzenbaz-cli.exe">
+      <authenticode-sign />
+    </pe-file>
   </zip-file>
 </artifact-configuration>

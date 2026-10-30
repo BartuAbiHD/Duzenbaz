@@ -1,6 +1,6 @@
 name: Derle ve yayımla
 
-# v* etiketi gönderilince Windows kurulum paketlerini derler, SignPath ile imzalar ve GitHub Release'e yükler.
+# v* etiketi gönderilince Windows kurulum paketlerini ve duzenbaz-cli.exe'yi derler, SignPath ile imzalar ve GitHub Release'e yükler.
 # SignPath henüz ayarlanmadıysa (SIGNPATH_ORGANIZATION_ID değişkeni yoksa) imza adımı atlanır ve paketler imzasız yüklenir.
 on:
   push:
@@ -28,12 +28,16 @@ jobs:
 
       - run: npm ci
 
-      - name: Testler
-        run: cargo test
+      - name: Testler (çekirdek, uygulama, CLI ve MCP)
+        run: cargo test --workspace
         working-directory: src-tauri
 
       - name: Derle (NSIS ve MSI)
         run: npm run tauri build
+
+      - name: Derle (komut satırı aracı)
+        run: cargo build --release -p duzenbaz-cli
+        working-directory: src-tauri
 
       - name: Kurulum paketlerini hazırla
         shell: bash
@@ -42,6 +46,7 @@ jobs:
           mkdir -p staging
           cp src-tauri/target/release/bundle/nsis/*-setup.exe "staging/Duzen-Baz_${VERSION}_x64-setup.exe"
           cp src-tauri/target/release/bundle/msi/*.msi "staging/Duzen-Baz_${VERSION}_x64_tr-TR.msi"
+          cp src-tauri/target/release/duzenbaz-cli.exe staging/duzenbaz-cli.exe
           ls -l staging
 
       - name: İmzasız paketleri yükle

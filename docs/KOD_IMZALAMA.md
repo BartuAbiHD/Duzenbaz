@@ -51,6 +51,6 @@ Etiket gönderilince `.github/workflows/release.yml` derler, imzalar ve Release'
 ## Bilmeniz gerekenler
 
 - **SmartScreen:** İmza, "bilinmeyen yayıncı" yerine yayıncı adınızı gösterir. Ancak SmartScreen uyarısının tamamen kalkması için indirme itibarının zamanla oluşması gerekir; ilk sürümlerde uyarı yine görülebilir.
-- **Kapsam:** Yalnızca kurulum dosyaları (`.exe` ve `.msi`) imzalanır. Kurulumdan sonra yüklenen `duzenbaz.exe` bu akışla imzalanmaz.
+- **Kapsam:** Kurulum dosyaları (`.exe` ve `.msi`) ile `duzenbaz-cli.exe` imzalanır. Kurulumdan sonra yüklenen `duzenbaz.exe` bu akışla imzalanmaz.
 - **Sürüm eşitliği:** `package.json` ve `tauri.conf.json` sürümleri aynı olmalı; iş akışı dosya adını `package.json`'dan alır.
 - **Doğrulanmadı:** Bu iş akışını ve XML yapılandırmasını çalıştırıp denemedim; SignPath hesabı olmadan denenemez. İlk çalıştırmada küçük düzeltmeler gerekebilir.

@@ -2,4 +2,6 @@ node_modules
 dist
 src-tauri/target
 src-tauri/gen
-release
+# Sürüm paketleri ve sağlama toplamları depoya girmez; yalnızca sürüm notları izlenir.
+release/*/*
+!release/*/RELEASE_NOTES*.md
