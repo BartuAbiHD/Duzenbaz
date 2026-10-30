@@ -242,7 +242,9 @@ To add a language, add a JSON file under `src/lib/i18n/` and register it in `ind
 | Night mode | yes | yes | yes | no |
 | Command line tool and MCP server | yes | yes | yes | yes |
 
-How this was checked: on every change a GitHub Actions workflow builds the app, runs all tests, builds the command line tool and exercises it (including an MCP handshake), and packages the app on Linux (`.deb`) and macOS (`.app`), next to Windows. Features that need a real desktop (the popup, night mode, auto-paste, idle detection, clipboard flags) were written against each system's API but have only been tried by hand on Windows. Please report anything that behaves differently on your system.
+How this was checked: on every change a GitHub Actions workflow runs on Windows, macOS and Linux. It builds the app, runs all tests, builds the command line tool and exercises it (including an MCP handshake), packages the app (`.deb` on Linux, `.app` on macOS) and starts it to check that it keeps running. On Linux it also runs the X11 code against a virtual X server (idle time, the night-mode colour change read back from the server, injected key presses) and the encryption key against a real Secret Service (GNOME Keyring). On macOS it runs the CoreGraphics and Objective-C code (idle time, front app, night mode).
+
+What has only been tried by hand on Windows, because it needs a real desktop session: the popup window and its global shortcut, the tray icon, auto-paste into another application, the password-manager flags, and live clipboard monitoring. Please report anything that behaves differently on your system.
 
 Some messages produced by the shared core (for example file errors) are still in Turkish, also in the command line tool.
 

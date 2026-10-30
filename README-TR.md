@@ -242,7 +242,9 @@ Yeni bir dil eklemek için `src/lib/i18n/` altına bir JSON dosyası ekleyip `in
 | Gece modu | evet | evet | evet | hayır |
 | Komut satırı aracı ve MCP sunucusu | evet | evet | evet | evet |
 
-Bunun nasıl denetlendiği: her değişiklikte bir GitHub Actions iş akışı uygulamayı derler, tüm testleri çalıştırır, komut satırı aracını derleyip dener (MCP el sıkışması dahil) ve Windows'un yanında Linux'ta (`.deb`) ve macOS'ta (`.app`) uygulamayı paketler. Gerçek bir masaüstü gerektiren özellikler (açılır pencere, gece modu, otomatik yapıştırma, boşta kalma algısı, pano işaretleri) her sistemin kendi API'sine göre yazıldı, ama elle yalnızca Windows'ta denendi. Sisteminizde farklı davranan bir şey görürseniz lütfen bildirin.
+Bunun nasıl denetlendiği: her değişiklikte bir GitHub Actions iş akışı Windows, macOS ve Linux'ta çalışır. Uygulamayı derler, tüm testleri çalıştırır, komut satırı aracını derleyip dener (MCP el sıkışması dahil), uygulamayı paketler (Linux'ta `.deb`, macOS'ta `.app`) ve çalışmaya devam ettiğini görmek için açar. Linux'ta ayrıca X11 kodunu sanal bir X sunucusuna karşı (boşta kalma süresi, sunucudan geri okunan gece modu renk değişikliği, gönderilen tuşlar) ve şifreleme anahtarını gerçek bir Secret Service'e (GNOME Keyring) karşı çalıştırır. macOS'ta CoreGraphics ve Objective-C kodunu (boşta kalma süresi, öndeki uygulama, gece modu) çalıştırır.
+
+Gerçek bir masaüstü oturumu gerektirdiği için yalnızca Windows'ta elle denenenler: açılır pencere ve genel kısayolu, tepsi simgesi, başka bir uygulamaya otomatik yapıştırma, parola yöneticisi işaretleri ve canlı pano izleme. Sisteminizde farklı davranan bir şey görürseniz lütfen bildirin.
 
 Ortak çekirdeğin ürettiği bazı mesajlar (örneğin dosya hataları) komut satırı aracında da Türkçedir.
 
