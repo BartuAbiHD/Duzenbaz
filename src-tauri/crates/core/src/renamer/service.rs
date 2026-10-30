@@ -27,7 +27,7 @@ pub fn expand(paths: &[String]) -> AppResult<Vec<String>> {
         };
         for c in candidates {
             let name = c.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
-            if c.is_file() && !name.starts_with('.') && seen.insert(c.to_string_lossy().to_lowercase()) {
+            if c.is_file() && !name.starts_with('.') && seen.insert(super::path_key(&c)) {
                 out.push(c.to_string_lossy().to_string());
             }
         }

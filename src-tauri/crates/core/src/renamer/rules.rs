@@ -237,7 +237,7 @@ fn new_name(path: &Path, idx: usize, rules: &Rules) -> AppResult<(String, String
 }
 
 fn key(p: &Path) -> String {
-    p.to_string_lossy().to_lowercase()
+    super::path_key(p)
 }
 
 pub fn preview(paths: &[String], rules: &Rules) -> AppResult<Vec<PreviewItem>> {
@@ -371,6 +371,18 @@ mod tests {
         let items = run(vec![f], &bad);
         assert_eq!(items[0].status, Status::Invalid);
         assert!(items[0].message.contains("tarih biçimi"));
+    }
+
+    /// Linux'ta `a.txt` ve `A.txt` iki ayrı dosyadır; aynı öneki alınca birbirleriyle çakışmamalıdır.
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn names_differing_only_by_case_do_not_conflict_on_linux() {
+        let t = tempdir().unwrap();
+        let (a, upper) = (t.path().join("a.txt"), t.path().join("A.txt"));
+        fs::write(&a, "1").unwrap();
+        fs::write(&upper, "2").unwrap();
+        let items = run(vec![a, upper], &Rules { prefix: "x_".into(), ..Default::default() });
+        assert!(items.iter().all(|i| i.status == Status::Ok), "{items:?}");
     }
 
     #[test]

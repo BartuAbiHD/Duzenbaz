@@ -109,9 +109,11 @@ pub fn run() {
         ])
         .build(tauri::generate_context!())
         .expect("Düzen-Baz başlatılamadı")
-        .run(|app, event| {
-            if let RunEvent::Exit = event {
-                breaks::on_exit(app);
-            }
+        .run(|app, event| match event {
+            RunEvent::Exit => breaks::on_exit(app),
+            // macOS: pencere tepsiye indirilmişken Dock simgesine tıklanınca ana pencere yeniden açılır.
+            #[cfg(target_os = "macos")]
+            RunEvent::Reopen { .. } => tray::show_main(app),
+            _ => {}
         });
 }

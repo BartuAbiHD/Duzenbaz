@@ -20,11 +20,20 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "msi"],
+    "targets": "all",
+    "category": "Utility",
+    "shortDescription": "Dosya düzenleyici, toplu adlandırıcı, pano geçmişi ve göz sağlığı asistanı",
+    "longDescription": "Düzen-Baz; dosyalarınızı türüne göre düzenler, toplu yeniden adlandırır, pano geçmişinizi şifreli tutar ve ekran molası hatırlatır. Tüm veriler yalnızca bilgisayarınızda kalır.",
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
     "windows": {
       "nsis": { "languages": ["Turkish"], "installMode": "currentUser" },
       "wix": { "language": "tr-TR" }
+    },
+    "macOS": {
+      "minimumSystemVersion": "11.0"
+    },
+    "linux": {
+      "deb": { "section": "utils" }
     }
   }
 }

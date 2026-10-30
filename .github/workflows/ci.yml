@@ -1,0 +1,101 @@
+name: CI
+
+# Her push ve çekme isteğinde Linux, macOS ve Windows'ta: arayüz denetimi, tüm Rust testleri, CLI/MCP duman testi
+# ve (Linux ile macOS'ta) masaüstü paketinin kurulabilir biçimde üretilebildiğinin kontrolü.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Linux, os: ubuntu-24.04 }
+          - { name: macOS, os: macos-latest }
+          - { name: Windows, os: windows-latest }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Linux sistem paketleri (Tauri için)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libssl-dev libxdo-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - name: Arayüz denetimi ve derlemesi
+        run: |
+          npm run check
+          npm run build
+
+      - name: Rust testleri (çekirdek, uygulama, CLI ve MCP)
+        run: cargo test --workspace
+        working-directory: src-tauri
+
+      - name: CLI derle
+        run: cargo build --release -p duzenbaz-cli
+        working-directory: src-tauri
+
+      - name: CLI ve MCP duman testi
+        shell: bash
+        working-directory: src-tauri
+        run: |
+          set -euo pipefail
+          EXE=target/release/duzenbaz-cli
+          [ -f "$EXE.exe" ] && EXE="$EXE.exe"
+          DATA="$RUNNER_TEMP/duzenbaz-data"
+          DIR="$RUNNER_TEMP/duzenbaz-smoke"
+          rm -rf "$DIR" "$DATA"; mkdir -p "$DIR"
+          echo x > "$DIR/foto.jpg"; echo p > "$DIR/rapor.pdf"
+
+          "$EXE" --version
+          "$EXE" --data-dir "$DATA" organize plan "$DIR"
+          "$EXE" --data-dir "$DATA" organize apply "$DIR" --yes
+          test -f "$DIR/Resimler/foto.jpg"
+          BATCH=$("$EXE" --data-dir "$DATA" --json organize history | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8'))[0].batchId")
+          "$EXE" --data-dir "$DATA" organize undo "$BATCH"
+          test -f "$DIR/foto.jpg"
+          "$EXE" --data-dir "$DATA" screen-time
+
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+            | "$EXE" --data-dir "$DATA" mcp --allow-dir "$DIR" > "$RUNNER_TEMP/mcp.out"
+          cat "$RUNNER_TEMP/mcp.out"
+          test "$(wc -l < "$RUNNER_TEMP/mcp.out" | tr -d ' ')" = "2"
+          grep -q '"name":"organize_preview"' "$RUNNER_TEMP/mcp.out"
+
+      - name: Masaüstü paketi (Linux .deb)
+        if: runner.os == 'Linux'
+        run: npm run tauri build -- --bundles deb
+
+      - name: Masaüstü paketi (macOS .app)
+        if: runner.os == 'macOS'
+        run: npm run tauri build -- --bundles app

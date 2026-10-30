@@ -18,7 +18,7 @@
     "idleNote": "Yalnızca bilgisayar başındayken sayılır. Bir dakikadan uzun süre klavye ve fareye dokunmazsanız sayaç durur; mola süresinden uzun ayrılırsanız mola yapmış sayılırsınız.",
     "night": "Gece modu (ekranı sıcak tona çevir)",
     "nightHint": "Akşam saatlerinde mavi ışığı azaltır, başlangıç ve bitişte yarım saatlik yumuşak geçiş yapar.",
-    "nightUnsupported": "Gece modu bu sürümde yalnızca Windows'ta çalışıyor.",
+    "nightUnsupported": "Gece modu bu oturumda kullanılamıyor. Linux'ta yalnızca X11 oturumlarında çalışır, Wayland'de çalışmaz.",
     "from": "Başlangıç",
     "to": "Bitiş",
     "warmth": "Sıcaklık",
@@ -65,7 +65,7 @@
     "maxItems": "En fazla saklanan öğe (sabitler hariç)",
     "autoPaste": "Açılır pencerede seçilen öğeyi otomatik yapıştır",
     "ignoredApps": "Yoksayılan programlar",
-    "ignoredHint": "Satır başına bir program (örn. keepass.exe). Bu programlardan kopyalananlar hiç kaydedilmez. Parola yöneticilerinin gizli işaretli kopyaları da otomatik atlanır.",
+    "ignoredHint": "Satır başına bir program, dosya adıyla (örn. keepassxc; .exe yazmak isteğe bağlıdır). Bu programlardan kopyalananlar hiç kaydedilmez. Windows ve macOS'ta parola yöneticilerinin gizli işaretli kopyaları da otomatik atlanır. Program algılama Wayland oturumlarında çalışmaz.",
     "popupHint": "↑↓ gez · Enter seç · Esc kapat"
   },
   "renamer": {

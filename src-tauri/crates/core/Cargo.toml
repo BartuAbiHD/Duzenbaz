@@ -16,7 +16,10 @@ chrono = "0.4.45"
 kamadak-exif = "0.6.1"
 regex = "1.13.1"
 chacha20poly1305 = "0.10"
-keyring = { version = "3", features = ["windows-native", "apple-native", "linux-native"] }
+# Şifreleme anahtarı işletim sisteminin güvenli deposunda tutulur: Windows Kimlik Bilgisi Yöneticisi,
+# macOS Anahtar Zinciri, Linux'ta Secret Service (GNOME Keyring / KWallet). Linux tarafı saf Rust'tır (zbus),
+# sistem kütüphanesi gerektirmez. Secret Service yoksa pano geçmişi kapalı kalır; anahtar sessizce kaybolmaz.
+keyring = { version = "3", features = ["windows-native", "apple-native", "async-secret-service", "async-io", "crypto-rust"] }
 dirs = "6"
 
 [dev-dependencies]
@@ -25,3 +28,11 @@ tempfile = "3.27.0"
 [target."cfg(windows)".dependencies]
 clipboard-win = "5.4.3"
 windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_System_Threading", "Win32_UI_Input_KeyboardAndMouse", "Win32_System_SystemInformation", "Win32_Graphics_Gdi", "Win32_UI_ColorSystem"] }
+
+# Linux (X11): boşta kalma süresi, gece modu (RandR gama), etkin pencere ve Ctrl+V gönderme.
+[target.'cfg(target_os = "linux")'.dependencies]
+x11rb = { version = "0.13", features = ["randr", "screensaver", "xtest"] }
+
+# macOS: öndeki uygulama ve pano işaretleri için Objective-C çalışma zamanı; geri kalanı CoreGraphics C arayüzüdür.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"

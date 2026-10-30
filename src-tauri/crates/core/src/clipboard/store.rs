@@ -4,17 +4,39 @@ use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
+/// Parola yöneticileri. Adlar uzantısız yazılır; karşılaştırma `.exe` uzantısını ve büyük/küçük harfi yok sayar,
+/// böylece aynı liste Windows (keepass.exe), macOS (KeePassXC) ve Linux (keepassxc) için geçerlidir.
 pub const DEFAULT_IGNORED_APPS: &[&str] = &[
-    "keepass.exe",
-    "keepassxc.exe",
-    "bitwarden.exe",
-    "1password.exe",
-    "lastpass.exe",
-    "dashlane.exe",
-    "enpass.exe",
-    "nordpass.exe",
-    "roboform.exe",
+    "keepass",
+    "keepassxc",
+    "keepass2",
+    "keeweb",
+    "bitwarden",
+    "1password",
+    "lastpass",
+    "dashlane",
+    "enpass",
+    "nordpass",
+    "roboform",
+    "strongbox",
 ];
+
+fn normalized_app_name(name: &str) -> String {
+    let lower = name.trim().to_lowercase();
+    lower.strip_suffix(".exe").map(str::to_string).unwrap_or(lower)
+}
+
+/// `process` (örn. "KeePass.exe", "keepassxc") yoksayma listesindeki bir girdiyle eşleşiyor mu.
+pub fn is_ignored_app(ignored: &[String], process: &str) -> bool {
+    let process = normalized_app_name(process);
+    ignored.iter().any(|a| normalized_app_name(a) == process)
+}
+
+/// Linux'ta Ctrl+Shift+V terminallerde "yapıştır"dır; genel kısayol onu çalmasın diye farklı bir varsayılan kullanılır.
+#[cfg(target_os = "linux")]
+pub const DEFAULT_SHORTCUT: &str = "Ctrl+Alt+V";
+#[cfg(not(target_os = "linux"))]
+pub const DEFAULT_SHORTCUT: &str = "Ctrl+Shift+V";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
@@ -32,7 +54,7 @@ impl Default for ClipSettings {
             paused: false,
             max_items: 500,
             ignored_apps: DEFAULT_IGNORED_APPS.iter().map(|s| s.to_string()).collect(),
-            shortcut: "Ctrl+Shift+V".into(),
+            shortcut: DEFAULT_SHORTCUT.into(),
             auto_paste: true,
         }
     }
@@ -283,6 +305,18 @@ mod tests {
         assert_eq!(by_cat.items[0].kind, "link");
         assert_eq!(by_cat.categories, vec!["Çalışma"]);
         assert_eq!(detect_kind("http://a.com bosluk var"), "text");
+    }
+
+    #[test]
+    fn ignored_apps_match_across_platforms() {
+        let list: Vec<String> = DEFAULT_IGNORED_APPS.iter().map(|s| s.to_string()).collect();
+        assert!(is_ignored_app(&list, "KeePass.exe"), "Windows: uzantılı ad");
+        assert!(is_ignored_app(&list, "KeePassXC"), "macOS: büyük harfli çalıştırılabilir ad");
+        assert!(is_ignored_app(&list, "keepassxc"), "Linux");
+        assert!(!is_ignored_app(&list, "notepad.exe"));
+        // Eski sürümlerde kaydedilmiş, uzantılı girdiler de çalışmaya devam eder.
+        assert!(is_ignored_app(&["Bitwarden.EXE".to_string()], "bitwarden"));
+        assert!(!is_ignored_app(&[], "keepass"));
     }
 
     #[test]

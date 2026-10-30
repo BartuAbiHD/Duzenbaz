@@ -259,7 +259,7 @@ pub struct SettingsResponse {
 
 #[tauri::command]
 pub fn breaks_get_settings(state: State<Breaks>) -> AppResult<SettingsResponse> {
-    Ok(SettingsResponse { settings: state.lock()?.settings.clone(), night_supported: platform::NIGHT_SUPPORTED })
+    Ok(SettingsResponse { settings: state.lock()?.settings.clone(), night_supported: platform::night_supported() })
 }
 
 #[tauri::command]
@@ -279,7 +279,7 @@ pub fn breaks_set_settings(app: AppHandle, db: State<Db>, state: State<Breaks>, 
     if let Some(ev) = ended {
         on_event(&app, ev);
     }
-    Ok(SettingsResponse { settings: s, night_supported: platform::NIGHT_SUPPORTED })
+    Ok(SettingsResponse { settings: s, night_supported: platform::night_supported() })
 }
 
 #[tauri::command]
@@ -319,7 +319,7 @@ pub fn breaks_snooze(app: AppHandle, state: State<Breaks>, minutes: u32) -> AppR
 /// Gece modunu birkaç saniyeliğine uygulayıp ardından zamanlamaya döner.
 #[tauri::command]
 pub fn breaks_preview_night(state: State<Breaks>, warmth: u8) -> AppResult<()> {
-    if !platform::NIGHT_SUPPORTED {
+    if !platform::night_supported() {
         return Err(AppError::msg("Gece modu şimdilik yalnızca Windows'ta destekleniyor."));
     }
     let mut rt = state.lock()?;

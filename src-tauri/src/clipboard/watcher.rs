@@ -73,7 +73,7 @@ fn capture(app: &AppHandle) {
         return;
     }
     if let Some(proc) = platform::foreground_process() {
-        if settings.ignored_apps.iter().any(|a| a.eq_ignore_ascii_case(&proc)) {
+        if store::is_ignored_app(&settings.ignored_apps, &proc) {
             return;
         }
     }

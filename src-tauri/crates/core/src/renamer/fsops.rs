@@ -6,7 +6,7 @@ use std::{
 };
 
 fn key(p: &Path) -> String {
-    p.to_string_lossy().to_lowercase()
+    super::path_key(p)
 }
 
 fn name(p: &Path) -> String {

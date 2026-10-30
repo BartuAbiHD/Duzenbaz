@@ -18,7 +18,7 @@
     "idleNote": "Only counts while you are at the computer. The timer pauses after a minute without keyboard or mouse input; being away longer than the break counts as a break.",
     "night": "Night mode (warm screen tint)",
     "nightHint": "Reduces blue light in the evening with a 30-minute fade at the start and end.",
-    "nightUnsupported": "Night mode currently works on Windows only.",
+    "nightUnsupported": "Night mode is not available in this session. On Linux it only works in X11 sessions, not in Wayland.",
     "from": "From",
     "to": "Until",
     "warmth": "Warmth",
@@ -65,7 +65,7 @@
     "maxItems": "Max items kept (pinned excluded)",
     "autoPaste": "Paste automatically when picking an item in the popup",
     "ignoredApps": "Ignored programs",
-    "ignoredHint": "One program per line (e.g. keepass.exe). Anything copied from them is never saved. Copies that password managers mark as sensitive are skipped automatically.",
+    "ignoredHint": "One program per line, by its file name (e.g. keepassxc; .exe is optional). Anything copied from them is never saved. On Windows and macOS, copies that password managers mark as sensitive are also skipped automatically. Program detection does not work in Wayland sessions.",
     "popupHint": "↑↓ move · Enter select · Esc close"
   },
   "renamer": {
