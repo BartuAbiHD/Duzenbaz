@@ -1,0 +1,106 @@
+name: Derle ve yayımla
+
+# v* etiketi gönderilince Windows kurulum paketlerini derler, SignPath ile imzalar ve GitHub Release'e yükler.
+# SignPath henüz ayarlanmadıysa (SIGNPATH_ORGANIZATION_ID değişkeni yoksa) imza adımı atlanır ve paketler imzasız yüklenir.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - name: Testler
+        run: cargo test
+        working-directory: src-tauri
+
+      - name: Derle (NSIS ve MSI)
+        run: npm run tauri build
+
+      - name: Kurulum paketlerini hazırla
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          mkdir -p staging
+          cp src-tauri/target/release/bundle/nsis/*-setup.exe "staging/Duzen-Baz_${VERSION}_x64-setup.exe"
+          cp src-tauri/target/release/bundle/msi/*.msi "staging/Duzen-Baz_${VERSION}_x64_tr-TR.msi"
+          ls -l staging
+
+      - name: İmzasız paketleri yükle
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-unsigned
+          path: staging/*
+          if-no-files-found: error
+
+  sign:
+    needs: build
+    # Yalnızca SignPath ayarlandıysa çalışır.
+    if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SignPath ile imzala
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ needs.build.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: İmzalı paketleri yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-signed
+          path: signed/*
+          if-no-files-found: error
+
+  publish:
+    needs: [build, sign]
+    # İmza adımı ya başarılı olmalı ya da hiç çalıştırılmamış (atlanmış) olmalı; başarısızsa yayımlanmaz.
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/') && needs.build.result == 'success' && (needs.sign.result == 'success' || needs.sign.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Paketleri indir
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.sign.result == 'success' && 'installers-signed' || 'installers-unsigned' }}
+          path: dist
+
+      - name: Release'e yükle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --prerelease --title "Düzen-Baz $TAG" --notes "Sürüm $TAG"
+          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber *
