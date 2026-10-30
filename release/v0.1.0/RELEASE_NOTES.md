@@ -28,14 +28,15 @@ See the [README](https://github.com/BartuAbiHD/Duzenbaz#command-line-tool-and-mc
 |---|---|
 | `Duzen-Baz_0.1.0_x64-setup.exe` | Recommended installer; installs per user, no administrator rights needed |
 | `Duzen-Baz_0.1.0_x64_tr-TR.msi` | MSI package |
+| `Duzen-Baz_0.1.0_macos_x64.zip` | macOS app (Intel build, runs on Apple Silicon through Rosetta); unzip and drag to Applications. Not signed: right-click and choose Open on first launch |
 | `duzenbaz-cli.exe` | Command line tool and MCP server, no installation needed |
 | `SHA256SUMS.txt` | Checksums of the files above |
 
-Requirements: Windows 10/11 (64-bit).
+Requirements: Windows 10/11 (64-bit), or macOS 11 or later for the zip.
 
 ### Known notes
 - **The files are not code-signed.** Windows SmartScreen may show an "unknown publisher" warning. Check your download against `SHA256SUMS.txt`.
-- Windows only for now. Night mode and auto-paste do not work on macOS or Linux yet.
+- Windows and macOS packages are provided; build Linux from source. The macOS app was built on a Mac and is not notarized. Night mode works on Linux only under X11.
 - This is a pre-release. The desktop app and the command line tool were tried on a Windows 11 development machine; the installers were not tried on a clean machine. The files were built by this repository's GitHub Actions workflow on a clean Windows runner, after all tests passed.
 - Clipboard data is encrypted field by field (not full-file encryption); details are in the [README](https://github.com/BartuAbiHD/Duzenbaz#security-and-privacy).
 - Some messages from the shared core (for example file errors) are still in Turkish, also in the command line tool.
@@ -45,4 +46,5 @@ Requirements: Windows 10/11 (64-bit).
 e3bad363e834b7f888a71b3486bcdde78fb205acc8c7aa45fdbda54ab0cc0f51  Duzen-Baz_0.1.0_x64-setup.exe
 dba70ae496a249e030a6ffb6da3da24a5086f53ac3f53d02060eb6ee800774d2  Duzen-Baz_0.1.0_x64_tr-TR.msi
 eb420f1054ebe6f1791720858950b01eb84f16df9902160fa8e8ae26d24e45fb  duzenbaz-cli.exe
+efaaebff093d0549059f8786c13f2a5aae0e0ffd54d9648688b5adb37c2aa1b4  Duzen-Baz_0.1.0_macos_x64.zip
 ```

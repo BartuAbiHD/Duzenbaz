@@ -133,11 +133,12 @@ Download from the [Releases](https://github.com/BartuAbiHD/Duzenbaz/releases) pa
 
 - `Duzen-Baz_<version>_x64-setup.exe` — installs per user, no administrator rights needed
 - `Duzen-Baz_<version>_x64_tr-TR.msi` — MSI package
+- `Duzen-Baz_<version>_macos_x64.zip` — macOS app (Intel build; runs on Apple Silicon through Rosetta). Unzip and drag `Duzen-Baz.app` to Applications
 - `duzenbaz-cli.exe` — the command line tool and MCP server; a single portable file, no installation needed
 
 > The packages are not code-signed yet, so Windows SmartScreen may show an "unknown publisher" warning. Check the download against `SHA256SUMS.txt`.
 
-There are no prebuilt packages for macOS and Linux yet; build them from source on the machine you want to use them on ([Development](#development)).
+The macOS app is not signed or notarized: on first launch right-click it and choose **Open**. There is no prebuilt Linux package yet; build it from source on the machine you want to use it on ([Development](#development)).
 
 ## Development
 

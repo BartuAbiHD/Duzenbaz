@@ -133,11 +133,12 @@ Kullanılan başlıca Rust paketleri: `walkdir`, `blake3`, `trash`, `kamadak-exi
 
 - `Duzen-Baz_<sürüm>_x64-setup.exe` — kullanıcı bazında kurulur, yönetici izni gerekmez
 - `Duzen-Baz_<sürüm>_x64_tr-TR.msi` — MSI paketi
+- `Duzen-Baz_<sürüm>_macos_x64.zip` — macOS uygulaması (Intel derlemesi; Apple Silicon'da Rosetta ile çalışır). Zip'i açıp `Duzen-Baz.app` dosyasını Uygulamalar'a sürükleyin
 - `duzenbaz-cli.exe` — komut satırı aracı ve MCP sunucusu; kurulum gerektirmeyen tek bir taşınabilir dosya
 
 > Paketler henüz kod imzalı değildir; Windows SmartScreen "bilinmeyen yayıncı" uyarısı gösterebilir. İndirdiğiniz dosyayı `SHA256SUMS.txt` ile doğrulayabilirsiniz.
 
-macOS ve Linux için henüz hazır paket yoktur; kullanacağınız makinede kaynaktan derleyin ([Geliştirme](#geliştirme)).
+macOS uygulaması imzalı veya noter onaylı değildir: ilk açılışta sağ tıklayıp **Aç**'ı seçin. Linux için henüz hazır paket yoktur; kullanacağınız makinede kaynaktan derleyin ([Geliştirme](#geliştirme)).
 
 ## Geliştirme
 
