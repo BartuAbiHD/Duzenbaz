@@ -1,7 +1,4 @@
-pub mod machine;
-pub mod night;
-pub mod platform;
-pub mod usage;
+pub use duzenbaz_core::breaks::{machine, night, platform, usage};
 
 use crate::{
     db::Db,

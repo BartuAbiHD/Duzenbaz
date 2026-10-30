@@ -1,0 +1,20 @@
+[package]
+name = "duzenbaz-cli"
+version = "0.1.0"
+description = "Düzen-Baz komut satırı aracı ve MCP sunucusu"
+edition = "2021"
+
+[[bin]]
+name = "duzenbaz-cli"
+path = "src/main.rs"
+
+[dependencies]
+duzenbaz-core = { path = "../core" }
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = "0.4.45"
+dirs = "6"
+
+[dev-dependencies]
+tempfile = "3.27.0"

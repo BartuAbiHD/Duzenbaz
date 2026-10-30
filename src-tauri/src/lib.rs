@@ -1,13 +1,13 @@
 mod breaks;
 mod clipboard;
-mod db;
-mod error;
-mod history;
 mod lockdown;
 mod organizer;
 mod renamer;
 mod tray;
 mod util;
+
+// Çekirdek paketteki ortak modüller; uygulamanın geri kalanı bunlara `crate::db` gibi yollarla erişir.
+pub use duzenbaz_core::{db, error, history};
 
 use error::AppResult;
 use std::sync::atomic::AtomicBool;

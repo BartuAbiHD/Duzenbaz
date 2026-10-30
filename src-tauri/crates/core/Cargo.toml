@@ -1,0 +1,27 @@
+[package]
+name = "duzenbaz-core"
+version = "0.1.0"
+description = "Düzen-Baz çekirdeği: arayüzden bağımsız dosya, adlandırma, pano ve mola mantığı"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+rusqlite = { version = "0.37", features = ["bundled"] }
+walkdir = "2.5.0"
+blake3 = "1.8.7"
+trash = "5.2.9"
+chrono = "0.4.45"
+kamadak-exif = "0.6.1"
+regex = "1.13.1"
+chacha20poly1305 = "0.10"
+keyring = { version = "3", features = ["windows-native", "apple-native", "linux-native"] }
+dirs = "6"
+
+[dev-dependencies]
+tempfile = "3.27.0"
+
+[target."cfg(windows)".dependencies]
+clipboard-win = "5.4.3"
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_System_Threading", "Win32_UI_Input_KeyboardAndMouse", "Win32_System_SystemInformation", "Win32_Graphics_Gdi", "Win32_UI_ColorSystem"] }

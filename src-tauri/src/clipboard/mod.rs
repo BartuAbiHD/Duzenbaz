@@ -1,7 +1,5 @@
-pub mod crypto;
-pub mod platform;
+pub use duzenbaz_core::clipboard::{crypto, platform, store};
 pub mod popup;
-pub mod store;
 pub mod watcher;
 
 use crate::{

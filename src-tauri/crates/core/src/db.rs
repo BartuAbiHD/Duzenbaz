@@ -1,6 +1,10 @@
 use crate::error::{AppError, AppResult};
 use rusqlite::Connection;
-use std::{path::Path, sync::Mutex};
+use std::{
+    path::{Path, PathBuf},
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 /// Sürüm i + 1 için betik `MIGRATIONS[i]`. Yeni modüller buraya yeni tablo ekler.
 const MIGRATIONS: &[&str] = &[
@@ -44,13 +48,43 @@ const MIGRATIONS: &[&str] = &[
      );",
 ];
 
-pub struct Db(pub Mutex<Connection>);
+/// Uygulamanın (Tauri) ve komut satırı aracının ortak kullandığı veri klasörü.
+/// Tauri'nin `app_data_dir()` değeriyle aynıdır; `DUZENBAZ_DATA_DIR` ile değiştirilebilir.
+pub fn default_data_dir() -> AppResult<PathBuf> {
+    if let Some(dir) = std::env::var_os("DUZENBAZ_DATA_DIR") {
+        return Ok(PathBuf::from(dir));
+    }
+    dirs::data_dir()
+        .map(|d| d.join("com.duzenbaz.app"))
+        .ok_or_else(|| AppError::msg("Veri klasörü bulunamadı."))
+}
+
+/// Veritabanı bağlantısı. Çoğaltılabilir (`Arc`), böylece arka plan iş parçacıklarına taşınabilir.
+#[derive(Clone)]
+pub struct Db(pub Arc<Mutex<Connection>>);
 
 impl Db {
     pub fn open(path: &Path) -> AppResult<Self> {
         let mut conn = Connection::open(path)?;
+        // Uygulama ve komut satırı aynı dosyayı aynı anda kullanabilir: kısa süre bekle, okuyanlar yazanı engellemesin.
+        conn.busy_timeout(Duration::from_secs(5))?;
+        conn.query_row("PRAGMA journal_mode = WAL", [], |r| r.get::<_, String>(0))?;
         migrate(&mut conn)?;
-        Ok(Db(Mutex::new(conn)))
+        Ok(Db(Arc::new(Mutex::new(conn))))
+    }
+
+    /// Ortak veri klasöründeki veritabanını açar (yoksa oluşturur).
+    pub fn open_default() -> AppResult<Self> {
+        let dir = default_data_dir()?;
+        std::fs::create_dir_all(&dir)?;
+        Self::open(&dir.join("duzenbaz.db"))
+    }
+
+    /// Yalnızca testler için bellekte geçici veritabanı.
+    pub fn in_memory() -> AppResult<Self> {
+        let mut conn = Connection::open_in_memory()?;
+        migrate(&mut conn)?;
+        Ok(Db(Arc::new(Mutex::new(conn))))
     }
 
     pub fn with<T>(&self, f: impl FnOnce(&mut Connection) -> AppResult<T>) -> AppResult<T> {
