@@ -26,3 +26,10 @@ Gereksinim: Windows 10/11 (64 bit). Bu sürümün macOS ve Linux paketleri ayrı
 ### Bilinen durumlar
 - **Dosyalar kod imzalı değildir** (güncelleme imzası, Windows kod imzalamadan ayrıdır). Windows SmartScreen "bilinmeyen yayıncı" uyarısı gösterebilir. İndirdiğiniz dosyayı `SHA256SUMS.txt` ile doğrulayabilirsiniz.
 - 0.1.0 sürümünde güncelleme kontrolü yoktur; 0.1.1'i bir kez elle kurun, sonraki sürümler kendini güncelleyebilir.
+
+### Sağlama toplamları (SHA-256)
+```
+a129a9c61c39e928c2658643512528c4b758e88e1999535b87485a14b2b2d8aa  Duzen-Baz_0.1.1_x64-setup.exe
+621763d51a217846695a10065f37e757ffd9b756477937681fd7d4c28cb90218  Duzen-Baz_0.1.1_x64_tr-TR.msi
+39413522ac955ccd52c726630c93a9797600baed7960c478837f25df230fd228  duzenbaz-cli.exe
+```
