@@ -67,7 +67,7 @@ fn read_clipboard() -> Option<Captured> {
 fn capture(app: &AppHandle) {
     let db = app.state::<Db>();
     let clip = app.state::<Clip>();
-    let Some(vault) = clip.vault.as_ref() else { return };
+    let Some(vault) = clip.vault.get() else { return };
     let Ok(settings) = db.with(|c| store::load_settings(c)) else { return };
     if settings.paused || platform::excluded_by_source() {
         return;

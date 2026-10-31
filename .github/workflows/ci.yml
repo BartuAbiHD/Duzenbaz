@@ -153,7 +153,7 @@ jobs:
           WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
           WEBKIT_DISABLE_COMPOSITING_MODE: "1"
         run: |
-          sudo apt-get install -y xdotool imagemagick openbox x11-utils
+          sudo apt-get install -y xdotool imagemagick openbox x11-utils gdb
           mkdir -p shots
           cat > click-test.sh <<'SH'
           set -x
@@ -161,6 +161,10 @@ jobs:
           src-tauri/target/release/duzenbaz & APP=$!
           sleep 15
           xwininfo -root -tree || true
+          if [ -z "$(xdotool search --onlyvisible --name zen-Baz)" ]; then
+            echo "Ana pencere görünmedi; ana iş parçacığının yığını:"
+            sudo gdb -p "$APP" -batch -ex "thread apply 1 bt" 2>&1 | tail -40 || true
+          fi
           WID=$(xdotool search --onlyvisible --name "zen-Baz" | head -1)
           echo "pencere: $WID"; xdotool getwindowgeometry "$WID"
           import -window root shots/0-ilk.png

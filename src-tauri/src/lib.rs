@@ -56,7 +56,8 @@ pub fn run() {
             app.manage(db::Db::open(&dir.join("duzenbaz.db"))?);
 
             // Anahtar alınamazsa uygulama yine açılır; yalnızca pano geçmişi devre dışı kalır.
-            app.manage(clipboard::Clip { vault: clipboard::crypto::Vault::load().ok(), shortcut_ok: AtomicBool::new(false) });
+            app.manage(clipboard::Clip { vault: Default::default(), shortcut_ok: AtomicBool::new(false) });
+            clipboard::load_vault(app.handle().clone());
             clipboard::popup::create(app.handle())?;
             let settings = app.state::<db::Db>().with(|c| clipboard::store::load_settings(c)).unwrap_or_default();
             let registered = clipboard::popup::register_shortcut(app.handle(), &settings.shortcut).is_ok();

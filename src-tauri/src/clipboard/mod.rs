@@ -17,19 +17,31 @@ use std::{
     time::Duration,
 };
 use store::{ClipItem, ClipSettings};
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Manager, State};
 
 pub struct Clip {
-    pub vault: Option<Vault>,
+    /// Şifreleme anahtarı arka planda yüklenir (bkz. `load_vault`); yüklenene kadar veya yüklenemezse boştur.
+    pub vault: std::sync::OnceLock<Vault>,
     pub shortcut_ok: AtomicBool,
 }
 
 impl Clip {
     fn vault(&self) -> AppResult<&Vault> {
-        self.vault.as_ref().ok_or_else(|| {
+        self.vault.get().ok_or_else(|| {
             AppError::msg("Pano geçmişi kullanılamıyor: şifreleme anahtarına erişilemedi. Uygulamayı yeniden başlatmayı deneyin.")
         })
     }
+}
+
+/// Anahtarı işletim sisteminin parola deposundan okur. Linux'ta Secret Service açılmayı veya bir parola penceresini
+/// bekleyebilir; bu yüzden ana iş parçacığını (ve arayüzü) bekletmemek için ayrı bir iş parçacığında yapılır.
+pub fn load_vault(app: AppHandle) {
+    thread::spawn(move || match Vault::load() {
+        Ok(v) => {
+            let _ = app.state::<Clip>().vault.set(v);
+        }
+        Err(e) => eprintln!("Pano şifreleme anahtarı yüklenemedi: {e}"),
+    });
 }
 
 #[derive(Serialize)]
