@@ -7,6 +7,13 @@
 
 pub use imp::{excluded_by_source, foreground_process, send_paste};
 
+/// Hata ayıklama: `DUZENBAZ_DEBUG=1` ile yapıştırma adımları standart hataya yazılır.
+pub fn debug(msg: &str) {
+    if std::env::var_os("DUZENBAZ_DEBUG").is_some() {
+        eprintln!("pano: {msg}");
+    }
+}
+
 /// Pano penceresi açılmadan önce etkin pencereyi hatırlar; seçimden sonra `restore_foreground_window` ona odağı geri verir.
 /// Yalnızca Linux/X11'de gereklidir: pencere yöneticisi, gizlenen pencerenin ardından odağı her zaman önceki pencereye
 /// vermez ve Ctrl+V boşa gider. Windows ve macOS bunu kendiliğinden yapar.
@@ -250,6 +257,7 @@ mod imp {
     pub fn remember_foreground_window() {
         let Some((conn, screen)) = connect() else { return };
         let window = active_window(&conn, conn.setup().roots[screen].root).unwrap_or(0);
+        super::debug(&format!("önceki etkin pencere: {window:#x}"));
         PREVIOUS_WINDOW.store(window, std::sync::atomic::Ordering::Relaxed);
     }
 
@@ -257,11 +265,12 @@ mod imp {
     pub fn restore_foreground_window() {
         let window = PREVIOUS_WINDOW.load(std::sync::atomic::Ordering::Relaxed);
         if window == 0 {
-            return;
+            return super::debug("odak geri verilemedi: önceki pencere bilinmiyor");
         }
-        let Some((conn, screen)) = connect() else { return };
+        let Some((conn, screen)) = connect() else { return super::debug("odak geri verilemedi: X sunucusuna bağlanılamadı") };
         let root = conn.setup().roots[screen].root;
         let Some(active) = atom(&conn, b"_NET_ACTIVE_WINDOW") else { return };
+        super::debug(&format!("odak geri veriliyor: {window:#x}"));
         let event = ClientMessageEvent::new(32, window, active, [2, 0, 0, 0, 0]);
         let _ = conn.send_event(false, root, EventMask::SUBSTRUCTURE_REDIRECT | EventMask::SUBSTRUCTURE_NOTIFY, event);
         let _ = conn.flush();
@@ -290,7 +299,7 @@ mod imp {
 
     /// Ctrl+V gönderir (XTest). Wayland'de yapılamaz, hiçbir şey yapmaz.
     pub fn send_paste() {
-        let Some((conn, screen)) = connect() else { return };
+        let Some((conn, screen)) = connect() else { return super::debug("Ctrl+V gönderilemedi: X sunucusuna bağlanılamadı (Wayland oturumu olabilir)") };
         let setup = conn.setup();
         let root = setup.roots[screen].root;
         let (min, max) = (setup.min_keycode, setup.max_keycode);
@@ -300,11 +309,14 @@ mod imp {
             map.keysyms.chunks(per_key).position(|syms| syms.contains(&keysym)).map(|i| min + i as u8)
         };
         // XK_Control_L = 0xffe3, XK_v = 0x0076
-        let (Some(ctrl), Some(v)) = (keycode_of(0xffe3), keycode_of(0x0076)) else { return };
+        let (Some(ctrl), Some(v)) = (keycode_of(0xffe3), keycode_of(0x0076)) else { return super::debug("Ctrl+V gönderilemedi: klavye düzeninde Ctrl veya V tuşu bulunamadı") };
         for (keycode, event) in [(ctrl, KEY_PRESS_EVENT), (v, KEY_PRESS_EVENT), (v, KEY_RELEASE_EVENT), (ctrl, KEY_RELEASE_EVENT)] {
-            let _ = conn.xtest_fake_input(event, keycode, 0, root, 0, 0, 0);
+            if let Err(e) = conn.xtest_fake_input(event, keycode, 0, root, 0, 0, 0) {
+                super::debug(&format!("tuş gönderilemedi: {e}"));
+            }
         }
         let _ = conn.flush();
+        super::debug("Ctrl+V gönderildi");
     }
 }
 

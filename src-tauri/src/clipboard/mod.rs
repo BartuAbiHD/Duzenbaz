@@ -134,6 +134,7 @@ pub fn clip_copy(app: AppHandle, db: State<Db>, clip: State<Clip>, id: i64, past
     let v = clip.vault()?;
     let (kind, bytes) = db.with(|c| store::get_content(c, v, id))?;
     put_on_clipboard(&kind, &bytes)?;
+    platform::debug(&format!("panoya konuldu ({kind}, {} bayt), yapıştır: {paste}", bytes.len()));
 
     if paste {
         popup::hide(&app);
