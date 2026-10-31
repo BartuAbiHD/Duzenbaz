@@ -181,6 +181,42 @@ jobs:
           # İlk ve son ekran farklı olmalı (tıklamalar sayfa değiştirmeli)
           if [ "$(compare -metric AE shots/0-ilk.png shots/5-y290.png null: 2>&1 | cut -d' ' -f1)" = "0" ]; then echo "tıklamalar ekranı değiştirmedi"; exit 1; fi
 
+      # Gerçek bir yapıştırma: pano geçmişinden eski bir öğeyi seçince bir giriş kutusuna (zenity) yazılmalı.
+      - name: Pano geçmişinden yapıştırma testi (Linux, Xvfb)
+        if: runner.os == 'Linux'
+        env:
+          WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
+        run: |
+          sudo apt-get install -y xclip zenity
+          mkdir -p shots
+          cat > paste-test.sh <<'SH'
+          set -x
+          export DUZENBAZ_DATA_DIR="$PWD/paste-data"; rm -rf "$DUZENBAZ_DATA_DIR"
+          openbox & sleep 2
+          src-tauri/target/release/duzenbaz > shots/app.log 2>&1 & APP=$!
+          for i in $(seq 1 60); do [ -n "$(xdotool search --onlyvisible --name zen-Baz)" ] && break; sleep 1; done
+          sleep 5
+          printf 'merhaba-pano-testi' | xclip -selection clipboard; sleep 4
+          printf 'baska-bir-sey' | xclip -selection clipboard; sleep 4
+          zenity --entry --title=hedef --text=yapistir > shots/zenity.out 2> shots/zenity.err & Z=$!
+          sleep 3
+          xdotool search --name hedef windowactivate --sync || true
+          sleep 1
+          import -window root shots/p1-hedef.png
+          xdotool key ctrl+alt+v; sleep 3
+          import -window root shots/p2-popup.png
+          xdotool key Down; sleep 1
+          xdotool key Return; sleep 4
+          import -window root shots/p3-sonra.png
+          xdotool key Return; sleep 2
+          wait $Z || true
+          kill "$APP" || true
+          echo "zenity çıktısı: $(cat shots/zenity.out)"
+          SH
+          xvfb-run -a --server-args="-screen 0 1280x800x24" bash paste-test.sh || true
+          cat shots/app.log || true
+          grep -q "merhaba-pano-testi" shots/zenity.out
+
       - name: Ekran görüntülerini yükle
         if: always() && runner.os == 'Linux'
         uses: actions/upload-artifact@v4
