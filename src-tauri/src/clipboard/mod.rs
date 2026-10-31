@@ -76,19 +76,64 @@ fn decode_png(bytes: &[u8]) -> Option<(usize, usize, Vec<u8>)> {
     Some((info.width as usize, info.height as usize, buf))
 }
 
+const CLIPBOARD_BUSY: &str = "İçerik panoya kopyalanamadı. Pano başka bir program tarafından kullanılıyor olabilir.";
+
+enum Payload {
+    Text(String),
+    Image(arboard::ImageData<'static>),
+}
+
+fn clipboard_payload(kind: &str, bytes: &[u8]) -> AppResult<Payload> {
+    if kind == "image" {
+        let (width, height, rgba) = decode_png(bytes).ok_or_else(|| AppError::msg("Görsel okunamadı."))?;
+        Ok(Payload::Image(arboard::ImageData { width, height, bytes: Cow::Owned(rgba) }))
+    } else {
+        Ok(Payload::Text(String::from_utf8_lossy(bytes).to_string()))
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn put_on_clipboard(kind: &str, bytes: &[u8]) -> AppResult<()> {
+    let payload = clipboard_payload(kind, bytes)?;
+    let mut cb = arboard::Clipboard::new().map_err(|_| AppError::msg("Pano şu anda kullanılamıyor. Lütfen tekrar deneyin."))?;
+    match payload {
+        Payload::Text(t) => cb.set_text(t),
+        Payload::Image(i) => cb.set_image(i),
+    }
+    .map_err(|_| AppError::msg(CLIPBOARD_BUSY))
+}
+
+/// X11 ve Wayland'de panonun içeriğini onu koyan program sunar: `Clipboard` nesnesi düşerse (ve bir pano yöneticisi
+/// yoksa) içerik kaybolur ve yapıştırma boş kalır. Bu yüzden nesne, hedef program içeriği alabilsin diye ayrı bir
+/// iş parçacığında birkaç saniye canlı tutulur (başka bir program panoyu alırsa daha erken biter).
+#[cfg(target_os = "linux")]
+fn put_on_clipboard(kind: &str, bytes: &[u8]) -> AppResult<()> {
+    use arboard::SetExtLinux;
+    let payload = clipboard_payload(kind, bytes)?;
+    let mut cb = arboard::Clipboard::new().map_err(|_| AppError::msg("Pano şu anda kullanılamıyor. Lütfen tekrar deneyin."))?;
+    let (tx, rx) = std::sync::mpsc::channel();
+    thread::spawn(move || {
+        let deadline = std::time::Instant::now() + Duration::from_secs(10);
+        let set = cb.set().wait_until(deadline);
+        let result = match payload {
+            Payload::Text(t) => set.text(t),
+            Payload::Image(i) => set.image(i),
+        };
+        let _ = tx.send(result.map_err(|_| ()));
+    });
+    // Kopyalama başarısızsa iş parçacığı hemen hata döner; başarılıysa bekleme süresi boyunca sonuç gelmez.
+    match rx.recv_timeout(Duration::from_millis(300)) {
+        Ok(Err(())) => Err(AppError::msg(CLIPBOARD_BUSY)),
+        _ => Ok(()),
+    }
+}
+
 /// Öğeyi panoya koyar. `paste` doğruysa pencereyi gizleyip önceki programa Ctrl+V gönderir.
 #[tauri::command]
 pub fn clip_copy(app: AppHandle, db: State<Db>, clip: State<Clip>, id: i64, paste: bool) -> AppResult<()> {
     let v = clip.vault()?;
     let (kind, bytes) = db.with(|c| store::get_content(c, v, id))?;
-    let mut cb = arboard::Clipboard::new().map_err(|_| AppError::msg("Pano şu anda kullanılamıyor. Lütfen tekrar deneyin."))?;
-    let result = if kind == "image" {
-        let (width, height, rgba) = decode_png(&bytes).ok_or_else(|| AppError::msg("Görsel okunamadı."))?;
-        cb.set_image(arboard::ImageData { width, height, bytes: Cow::Owned(rgba) })
-    } else {
-        cb.set_text(String::from_utf8_lossy(&bytes).to_string())
-    };
-    result.map_err(|_| AppError::msg("İçerik panoya kopyalanamadı. Pano başka bir program tarafından kullanılıyor olabilir."))?;
+    put_on_clipboard(&kind, &bytes)?;
 
     if paste {
         popup::hide(&app);
