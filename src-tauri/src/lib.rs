@@ -31,7 +31,19 @@ fn app_restart(app: tauri::AppHandle) {
     app.restart();
 }
 
+/// Sanal makinelerde ve bazı sürücülerle WebKitGTK'nın donanım hızlandırmalı çizimi pencereyi boş bırakır veya fare tıklamalarını
+/// yutar (Xubuntu 22.04, sanal makine). Bu arayüz hafif olduğundan yazılım çizimi yeterlidir; kullanıcı kendi değerini
+/// vermişse (örneğin `WEBKIT_DISABLE_COMPOSITING_MODE=0`) ona dokunulmaz.
+#[cfg(target_os = "linux")]
+fn linux_webkit_defaults() {
+    if std::env::var_os("WEBKIT_DISABLE_COMPOSITING_MODE").is_none() {
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+    }
+}
+
 pub fn run() {
+    #[cfg(target_os = "linux")]
+    linux_webkit_defaults();
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
         .plugin(tauri_plugin_dialog::init())

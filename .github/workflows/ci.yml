@@ -151,7 +151,7 @@ jobs:
         if: runner.os == 'Linux'
         env:
           WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
-          WEBKIT_DISABLE_COMPOSITING_MODE: "1"
+          # WEBKIT_DISABLE_COMPOSITING_MODE bilerek verilmez: uygulamanın kendi varsayılanı sınanır.
         run: |
           sudo apt-get install -y xdotool imagemagick openbox x11-utils gdb
           mkdir -p shots
