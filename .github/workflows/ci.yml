@@ -184,6 +184,7 @@ jobs:
       # Gerçek bir yapıştırma: pano geçmişinden eski bir öğeyi seçince bir giriş kutusuna (zenity) yazılmalı.
       - name: Pano geçmişinden yapıştırma testi (Linux, Xvfb)
         if: runner.os == 'Linux'
+        timeout-minutes: 6
         env:
           WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
         run: |
@@ -209,11 +210,11 @@ jobs:
           xdotool key Return; sleep 4
           import -window root shots/p3-sonra.png
           xdotool key Return; sleep 2
-          wait $Z || true
+          sleep 1; kill "$Z" 2>/dev/null || true
           kill "$APP" || true
           echo "zenity çıktısı: $(cat shots/zenity.out)"
           SH
-          xvfb-run -a --server-args="-screen 0 1280x800x24" bash paste-test.sh || true
+          timeout 150 xvfb-run -a --server-args="-screen 0 1280x800x24" bash paste-test.sh || true
           cat shots/app.log || true
           grep -q "merhaba-pano-testi" shots/zenity.out
 
