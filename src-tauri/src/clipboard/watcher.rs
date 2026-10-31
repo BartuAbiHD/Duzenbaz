@@ -64,17 +64,25 @@ fn read_clipboard() -> Option<Captured> {
     None
 }
 
+/// Hata ayıklama: `DUZENBAZ_DEBUG=1` ile pano yakalamanın neden atlandığı standart hataya yazılır.
+fn dbg(why: &str) {
+    if std::env::var_os("DUZENBAZ_DEBUG").is_some() {
+        eprintln!("pano: {why}");
+    }
+}
+
 fn capture(app: &AppHandle) {
+    dbg("değişiklik bildirimi geldi");
     let db = app.state::<Db>();
     let clip = app.state::<Clip>();
-    let Some(vault) = clip.vault.get() else { return };
+    let Some(vault) = clip.vault.get() else { return dbg("anahtar henüz yüklenmedi") };
     let Ok(settings) = db.with(|c| store::load_settings(c)) else { return };
     if settings.paused || platform::excluded_by_source() {
-        return;
+        return dbg("duraklatılmış veya kaynak yoksayılıyor");
     }
     if let Some(proc) = platform::foreground_process() {
         if store::is_ignored_app(&settings.ignored_apps, &proc) {
-            return;
+            return dbg(&format!("yoksayılan program: {proc}"));
         }
     }
 
@@ -92,7 +100,7 @@ fn capture(app: &AppHandle) {
             let Some(png) = encode_png(width, height, &rgba) else { return };
             ("image", Cow::Owned(png), Some((width as u32, height as u32)))
         }
-        None => return,
+        None => return dbg("pano okunamadı"),
     };
 
     let now_ms = chrono::Utc::now().timestamp_millis();

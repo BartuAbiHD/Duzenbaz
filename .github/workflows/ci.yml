@@ -194,11 +194,12 @@ jobs:
           set -x
           export DUZENBAZ_DATA_DIR="$PWD/paste-data"; rm -rf "$DUZENBAZ_DATA_DIR"
           openbox & sleep 2
-          src-tauri/target/release/duzenbaz > shots/app.log 2>&1 & APP=$!
+          DUZENBAZ_DEBUG=1 src-tauri/target/release/duzenbaz > shots/app.log 2>&1 & APP=$!
           for i in $(seq 1 60); do [ -n "$(xdotool search --onlyvisible --name zen-Baz)" ] && break; sleep 1; done
           sleep 5
           printf 'merhaba-pano-testi' | xclip -selection clipboard -t UTF8_STRING; sleep 4
           printf 'baska-bir-sey' | xclip -selection clipboard -t UTF8_STRING; sleep 4
+          src-tauri/target/release/duzenbaz-cli --data-dir "$DUZENBAZ_DATA_DIR" clipboard list || true
           zenity --entry --title=hedef --text=yapistir > shots/zenity.out 2> shots/zenity.err & Z=$!
           sleep 3
           xdotool search --name hedef windowactivate --sync || true
