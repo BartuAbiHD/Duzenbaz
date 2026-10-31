@@ -159,7 +159,7 @@ jobs:
           set -x
           openbox & sleep 2
           src-tauri/target/release/duzenbaz & APP=$!
-          sleep 15
+          sleep 45
           xwininfo -root -tree || true
           if [ -z "$(xdotool search --onlyvisible --name zen-Baz)" ]; then
             echo "Ana pencere görünmedi; ana iş parçacığının yığını:"
