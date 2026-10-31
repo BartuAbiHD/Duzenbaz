@@ -46,11 +46,11 @@ Requirements: Windows 10/11 (64-bit), macOS 11 or later for the zip, or a 64-bit
 
 ### Checksums (SHA-256)
 ```
-b4bbf315e0eb1175ff3e488286826e1b9e3b31c0b7f72ef3b8179b2afb83b67d  Duzen-Baz_0.1.0_x64-setup.exe
-d9b2bbba0ae13c55b775c5470431e4327df87c2907cda36655c50b9e1a13d267  Duzen-Baz_0.1.0_x64_tr-TR.msi
-eb420f1054ebe6f1791720858950b01eb84f16df9902160fa8e8ae26d24e45fb  duzenbaz-cli.exe
+783fe16284d3f8a2d5e9b435b06acf9b32f69c65fb0468a2534a7a97d165abba  Duzen-Baz_0.1.0_x64-setup.exe
+c102adc7b8c5e8c061c883d8deec0dd19b46a165ec8a5ec25e5f0fe290ddc7dd  Duzen-Baz_0.1.0_x64_tr-TR.msi
+760e6ffc4ac272959139566e00b7829496540854b45ca9c3ea704944f3138348  duzenbaz-cli.exe
 efaaebff093d0549059f8786c13f2a5aae0e0ffd54d9648688b5adb37c2aa1b4  Duzen-Baz_0.1.0_macos_x64.zip
 0c9a2118ef78d19094ac3513157d3508164e265f9734122512c3134023508af5  duzenbaz-cli_0.1.0_macos_x64.tar.gz
-5abffea7ed6a8268a8e402dbf606642b7fe5700024ae1f3afe29cecdd541440c  Duzen-Baz_0.1.0_amd64.deb
-68291e00184c6bda86e8bcbdbc00b2f13e678a80d29e4fa2d8724e0ccecf94fa  duzenbaz-cli_0.1.0_linux_x64.tar.gz
+7abf07640f74c33d615844976106f849788cc97b19a7ceb6218d176a98f36753  Duzen-Baz_0.1.0_amd64.deb
+b4098ab2336aee3c7c1bc71a4a0999356258e3fbd5052a9b6f697b70882ebce0  duzenbaz-cli_0.1.0_linux_x64.tar.gz
 ```
