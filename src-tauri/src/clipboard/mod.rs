@@ -138,6 +138,8 @@ pub fn clip_copy(app: AppHandle, db: State<Db>, clip: State<Clip>, id: i64, past
     if paste {
         popup::hide(&app);
         thread::spawn(|| {
+            thread::sleep(Duration::from_millis(100));
+            platform::restore_foreground_window();
             thread::sleep(Duration::from_millis(150));
             platform::send_paste();
         });

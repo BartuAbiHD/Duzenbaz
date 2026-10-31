@@ -7,6 +7,16 @@
 
 pub use imp::{excluded_by_source, foreground_process, send_paste};
 
+/// Pano penceresi açılmadan önce etkin pencereyi hatırlar; seçimden sonra `restore_foreground_window` ona odağı geri verir.
+/// Yalnızca Linux/X11'de gereklidir: pencere yöneticisi, gizlenen pencerenin ardından odağı her zaman önceki pencereye
+/// vermez ve Ctrl+V boşa gider. Windows ve macOS bunu kendiliğinden yapar.
+#[cfg(target_os = "linux")]
+pub use imp::{remember_foreground_window, restore_foreground_window};
+#[cfg(not(target_os = "linux"))]
+pub fn remember_foreground_window() {}
+#[cfg(not(target_os = "linux"))]
+pub fn restore_foreground_window() {}
+
 #[cfg(windows)]
 mod imp {
     use clipboard_win::{raw, register_format, Clipboard};
@@ -200,7 +210,7 @@ mod imp {
     use x11rb::{
         connection::Connection,
         protocol::{
-            xproto::{AtomEnum, ConnectionExt as _, KEY_PRESS_EVENT, KEY_RELEASE_EVENT},
+            xproto::{AtomEnum, ClientMessageEvent, ConnectionExt as _, EventMask, KEY_PRESS_EVENT, KEY_RELEASE_EVENT},
             xtest::ConnectionExt as _,
         },
         rust_connection::RustConnection,
@@ -227,11 +237,39 @@ mod imp {
         conn.intern_atom(false, name).ok()?.reply().ok().map(|r| r.atom)
     }
 
-    /// Etkin pencerenin işlem kimliği (`_NET_ACTIVE_WINDOW` → `_NET_WM_PID`).
-    fn active_window_pid(conn: &RustConnection, root: u32) -> Option<u32> {
+    /// Etkin pencere (`_NET_ACTIVE_WINDOW`).
+    fn active_window(conn: &RustConnection, root: u32) -> Option<u32> {
         let active = atom(conn, b"_NET_ACTIVE_WINDOW")?;
         let reply = conn.get_property(false, root, active, AtomEnum::WINDOW, 0, 1).ok()?.reply().ok()?;
-        let window = reply.value32()?.next()?;
+        let window = reply.value32()?.next();
+        window.filter(|w| *w != 0)
+    }
+
+    static PREVIOUS_WINDOW: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+    pub fn remember_foreground_window() {
+        let Some((conn, screen)) = connect() else { return };
+        let window = active_window(&conn, conn.setup().roots[screen].root).unwrap_or(0);
+        PREVIOUS_WINDOW.store(window, std::sync::atomic::Ordering::Relaxed);
+    }
+
+    /// Pencere yöneticisine "şu pencereyi etkinleştir" der (`_NET_ACTIVE_WINDOW` istemci iletisi, kaynak: pager).
+    pub fn restore_foreground_window() {
+        let window = PREVIOUS_WINDOW.load(std::sync::atomic::Ordering::Relaxed);
+        if window == 0 {
+            return;
+        }
+        let Some((conn, screen)) = connect() else { return };
+        let root = conn.setup().roots[screen].root;
+        let Some(active) = atom(&conn, b"_NET_ACTIVE_WINDOW") else { return };
+        let event = ClientMessageEvent::new(32, window, active, [2, 0, 0, 0, 0]);
+        let _ = conn.send_event(false, root, EventMask::SUBSTRUCTURE_REDIRECT | EventMask::SUBSTRUCTURE_NOTIFY, event);
+        let _ = conn.flush();
+    }
+
+    /// Etkin pencerenin işlem kimliği (`_NET_ACTIVE_WINDOW` → `_NET_WM_PID`).
+    fn active_window_pid(conn: &RustConnection, root: u32) -> Option<u32> {
+        let window = active_window(conn, root)?;
         let pid_atom = atom(conn, b"_NET_WM_PID")?;
         let reply = conn.get_property(false, window, pid_atom, AtomEnum::CARDINAL, 0, 1).ok()?.reply().ok()?;
         // Değer önce bir değişkene alınır: yineleyici `reply`'dan ödünç alır ve fonksiyon sonunda ondan önce ölmelidir.

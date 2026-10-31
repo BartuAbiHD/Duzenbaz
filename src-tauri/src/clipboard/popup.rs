@@ -24,6 +24,7 @@ pub fn toggle(app: &AppHandle) {
     if w.is_visible().unwrap_or(false) {
         let _ = w.hide();
     } else {
+        super::platform::remember_foreground_window();
         let _ = w.center();
         let _ = w.show();
         let _ = w.set_focus();
