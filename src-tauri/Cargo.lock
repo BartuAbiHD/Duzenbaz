@@ -1175,7 +1175,7 @@ checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
 name = "duzenbaz"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "arboard",
  "base64 0.23.1",
@@ -1199,7 +1199,7 @@ dependencies = [
 
 [[package]]
 name = "duzenbaz-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "clap",
@@ -1212,7 +1212,7 @@ dependencies = [
 
 [[package]]
 name = "duzenbaz-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "blake3",
  "chacha20poly1305",

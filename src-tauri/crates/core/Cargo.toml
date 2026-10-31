@@ -1,6 +1,6 @@
 [package]
 name = "duzenbaz-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Düzen-Baz çekirdeği: arayüzden bağımsız dosya, adlandırma, pano ve mola mantığı"
 edition = "2021"
 

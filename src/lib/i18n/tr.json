@@ -178,7 +178,7 @@
     "updatesRestart": "Yeniden başlat",
     "updatesOpenPage": "İndirme sayfasını aç",
     "updatesManual": "Bu sistemde uygulama kendini kuramaz; yeni paketi indirip kurun.",
-    "updatesError": "Güncelleme kontrol edilemedi.",
+    "updatesError": "Güncelleme bilgisi alınamadı. İnternet bağlantınız olmayabilir veya henüz yayınlanmış bir güncelleme yok.",
     "updatesToast": "Yeni sürüm var: {version}. Ayarlar'dan kurabilirsiniz."
   }
 }

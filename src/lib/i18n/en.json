@@ -178,7 +178,7 @@
     "updatesRestart": "Restart",
     "updatesOpenPage": "Open download page",
     "updatesManual": "On this system the app cannot install itself; download and install the new package.",
-    "updatesError": "Could not check for updates.",
+    "updatesError": "Could not get update information. You may be offline, or no update has been published yet.",
     "updatesToast": "New version available: {version}. You can install it from Settings."
   }
 }
