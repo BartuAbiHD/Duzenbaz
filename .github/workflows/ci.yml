@@ -153,14 +153,15 @@ jobs:
           WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
           WEBKIT_DISABLE_COMPOSITING_MODE: "1"
         run: |
-          sudo apt-get install -y xdotool imagemagick openbox
+          sudo apt-get install -y xdotool imagemagick openbox x11-utils
           mkdir -p shots
           cat > click-test.sh <<'SH'
           set -x
           openbox & sleep 2
           src-tauri/target/release/duzenbaz & APP=$!
           sleep 15
-          WID=$(xdotool search --onlyvisible --name "Düzen-Baz" | head -1)
+          xwininfo -root -tree || true
+          WID=$(xdotool search --onlyvisible --name "zen-Baz" | head -1)
           echo "pencere: $WID"; xdotool getwindowgeometry "$WID"
           import -window root shots/0-ilk.png
           i=1
