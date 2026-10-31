@@ -3,6 +3,11 @@
 /// Bu kadar saniye girdi olmazsa kullanıcı bilgisayar başında sayılmaz.
 pub const IDLE_LIMIT: u32 = 60;
 
+/// Bu kadar saniye (veya mola süresi daha uzunsa o kadar) girdi olmazsa kendiliğinden mola yapılmış sayılır ve sayaç sıfırlanır.
+/// Okurken veya video izlerken klavye/fareye dokunulmaz ama ekrana bakılmaya devam edilir; bu yüzden eşik bir dakikadan uzun tutulur,
+/// yoksa kısa duraklamalar sayacı hep sıfırlar ve mola hiç gelmez.
+pub const NATURAL_BREAK_SECS: u32 = 300;
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Phase {
     Working,
@@ -37,7 +42,7 @@ impl Machine {
                     return None;
                 }
                 // Kullanıcı zaten yeterince uzun süre ekrandan uzaksa bu kendiliğinden bir moladır.
-                if idle_secs >= self.break_secs.max(IDLE_LIMIT) {
+                if idle_secs >= self.break_secs.max(NATURAL_BREAK_SECS) {
                     self.work_secs = 0;
                     return None;
                 }
@@ -120,8 +125,21 @@ mod tests {
         run(&mut m, 30, 0);
         run(&mut m, 1, IDLE_LIMIT - 1); // hâlâ başında sayılır
         assert_eq!(m.work_secs, 31);
-        run(&mut m, 1, IDLE_LIMIT); // 60 sn girdi yok, mola 20 sn → doğal mola
+        run(&mut m, 1, NATURAL_BREAK_SECS); // 5 dk girdi yok → doğal mola
         assert_eq!(m.work_secs, 0);
+    }
+
+    #[test]
+    fn short_pauses_do_not_reset_the_counter() {
+        // Okurken 1-4 dk klavye/fareye dokunmamak sayacı sıfırlamaz, yalnızca durdurur; mola sonunda yine gelir.
+        let mut m = Machine::new(true, 100, 20);
+        run(&mut m, 30, 0);
+        run(&mut m, 120, 90); // 2 dk girdisiz: sayaç durur
+        assert_eq!(m.work_secs, 30);
+        run(&mut m, 1, NATURAL_BREAK_SECS - 1);
+        assert_eq!(m.work_secs, 30);
+        let evs = run(&mut m, 70, 0);
+        assert_eq!(evs, vec![Event::BreakStarted]);
     }
 
     #[test]

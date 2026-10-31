@@ -47,7 +47,11 @@ pub fn run() {
                 .build(),
         )
         .setup(|app| {
-            let dir = app.path().app_data_dir()?;
+            // CLI ile aynı kural: DUZENBAZ_DATA_DIR verilmişse veri orada tutulur (ayrı bir kopyayı denemek için).
+            let dir = match std::env::var_os("DUZENBAZ_DATA_DIR") {
+                Some(d) => std::path::PathBuf::from(d),
+                None => app.path().app_data_dir()?,
+            };
             std::fs::create_dir_all(&dir)?;
             app.manage(db::Db::open(&dir.join("duzenbaz.db"))?);
 

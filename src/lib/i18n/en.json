@@ -19,7 +19,7 @@
     "nextBreak": "Time until next break",
     "every": "Every how many minutes",
     "lasts": "Break length (seconds)",
-    "idleNote": "Only counts while you are at the computer. The timer pauses after a minute without keyboard or mouse input; being away longer than the break counts as a break.",
+    "idleNote": "Only counts while you are at the computer. The timer pauses (but does not reset) after a minute without keyboard or mouse input; being away for more than 5 minutes counts as a break.",
     "night": "Night mode (warm screen tint)",
     "nightHint": "Reduces blue light in the evening with a 30-minute fade at the start and end.",
     "nightUnsupported": "Night mode is not available in this session. On Linux it only works in X11 sessions, not in Wayland.",

@@ -19,7 +19,7 @@
     "nextBreak": "Sonraki molaya kalan",
     "every": "Her kaç dakikada bir",
     "lasts": "Mola süresi (saniye)",
-    "idleNote": "Yalnızca bilgisayar başındayken sayılır. Bir dakikadan uzun süre klavye ve fareye dokunmazsanız sayaç durur; mola süresinden uzun ayrılırsanız mola yapmış sayılırsınız.",
+    "idleNote": "Yalnızca bilgisayar başındayken sayılır. Bir dakikadan uzun süre klavye ve fareye dokunmazsanız sayaç durur (sıfırlanmaz); 5 dakikadan uzun ayrılırsanız mola yapmış sayılırsınız.",
     "night": "Gece modu (ekranı sıcak tona çevir)",
     "nightHint": "Akşam saatlerinde mavi ışığı azaltır, başlangıç ve bitişte yarım saatlik yumuşak geçiş yapar.",
     "nightUnsupported": "Gece modu bu oturumda kullanılamıyor. Linux'ta yalnızca X11 oturumlarında çalışır, Wayland'de çalışmaz.",

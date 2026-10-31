@@ -146,6 +146,44 @@ jobs:
           echo "çıkış kodu: $code (124 = 25 saniye boyunca çalışmaya devam etti)"
           [ "$code" = "124" ]
 
+      # Gerçek bir masaüstü oturumunda (Xvfb + openbox) kenar çubuğundaki öğelere tıklayıp ekranın değiştiğini doğrular.
+      - name: Arayüz tıklama testi (Linux, Xvfb)
+        if: runner.os == 'Linux'
+        env:
+          WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
+          WEBKIT_DISABLE_COMPOSITING_MODE: "1"
+        run: |
+          sudo apt-get install -y xdotool imagemagick openbox
+          mkdir -p shots
+          cat > click-test.sh <<'SH'
+          set -x
+          openbox & sleep 2
+          src-tauri/target/release/duzenbaz & APP=$!
+          sleep 15
+          WID=$(xdotool search --onlyvisible --name "Düzen-Baz" | head -1)
+          echo "pencere: $WID"; xdotool getwindowgeometry "$WID"
+          import -window root shots/0-ilk.png
+          i=1
+          for y in 90 140 190 240 290; do
+            xdotool mousemove --window "$WID" 90 "$y" click 1
+            sleep 2
+            import -window root "shots/$i-y$y.png"
+            i=$((i+1))
+          done
+          kill "$APP" || true
+          SH
+          xvfb-run -a --server-args="-screen 0 1280x800x24" bash click-test.sh
+          # İlk ve son ekran farklı olmalı (tıklamalar sayfa değiştirmeli)
+          if [ "$(compare -metric AE shots/0-ilk.png shots/5-y290.png null: 2>&1 | cut -d' ' -f1)" = "0" ]; then echo "tıklamalar ekranı değiştirmedi"; exit 1; fi
+
+      - name: Ekran görüntülerini yükle
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-ui-shots
+          path: shots/*.png
+          if-no-files-found: ignore
+
       - name: Masaüstü paketi (macOS .app)
         if: runner.os == 'macOS'
         run: npm run tauri build -- --bundles app
